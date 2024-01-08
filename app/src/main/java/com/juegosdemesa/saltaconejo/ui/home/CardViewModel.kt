@@ -21,7 +21,7 @@ class CardViewModel @Inject constructor(
         repository.getAllItemsStream()
             .map {// Add a cover
                 val modifiedList = it.toMutableList()
-                modifiedList.add(0,Card("Dale al botón derecho para comenzar"))
+                modifiedList.add(0,Card("Dale a ✓ para comenzar"))
                 modifiedList
             }
             .map { CardsUiState(it) }

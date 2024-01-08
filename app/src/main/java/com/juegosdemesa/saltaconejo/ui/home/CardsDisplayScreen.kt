@@ -1,5 +1,6 @@
 package com.juegosdemesa.saltaconejo.ui.home
 
+
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -10,7 +11,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -47,14 +47,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.ConstraintSet
+import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
@@ -65,7 +68,6 @@ import com.alexstyl.swipeablecard.rememberSwipeableCardState
 import com.alexstyl.swipeablecard.swipableCard
 import com.juegosdemesa.saltaconejo.R
 import com.juegosdemesa.saltaconejo.data.Card
-import com.juegosdemesa.saltaconejo.data.CountDownViewModel
 import com.juegosdemesa.saltaconejo.ui.navigation.NavigationDestination
 import com.juegosdemesa.saltaconejo.util.Utility
 import com.juegosdemesa.saltaconejo.util.Utility.formatTime
@@ -83,26 +85,15 @@ private lateinit var cardStates: List<Pair<Card, SwipeableCardState>>
 private lateinit var cardViewModel: CardViewModel
 private lateinit var scope: CoroutineScope
 
-@OptIn(ExperimentalSwipeableCardApi::class, ExperimentalCoilApi::class)
-@Preview(showBackground = true)
+
 @Composable
 fun CardsDisplayScreen(
 //    cardViewModel: CardViewModel = hiltViewModel()
 ){
     cardViewModel = viewModel(factory = AppViewModelProvider.Factory)
     countDownViewModel = viewModel()
-
-    val context = LocalContext.current
-    val cardUiState by cardViewModel.cardUiState.collectAsState()
-
-    cardStates = cardUiState.itemList.reversed()
-        .map { it to rememberSwipeableCardState() }
     scope = rememberCoroutineScope()
 
-
-    val time by countDownViewModel.time.observeAsState(Utility.TIME_COUNTDOWN.formatTime())
-    val progress by countDownViewModel.progress.observeAsState(1.00F)
-    val isPlaying by countDownViewModel.isPlaying.observeAsState(false)
     val timeIsUp by countDownViewModel.isTimeUp.observeAsState(false)
 
     AnimatedVisibility(
@@ -110,99 +101,7 @@ fun CardsDisplayScreen(
         enter = fadeIn(),
         exit = fadeOut()
     ) {
-        Column(
-            Modifier
-                .fillMaxSize()
-                .paint( // Background image
-                    painter = rememberImagePainter(R.drawable.double_bubble),
-                    contentScale = ContentScale.Crop
-
-                ),
-            verticalArrangement = Arrangement.SpaceEvenly
-        ){
-            Box(
-                Modifier
-                    .padding(24.dp)
-                    .fillMaxWidth()
-                    .aspectRatio(1f)
-            ){
-                cardStates.forEach{ (card, state) ->
-                    if (state.swipedDirection == null){
-                        // En caso de que no se de al botón, no se puede quitar la primera tarjeta
-                        val modifier = if (isPlaying){
-                            Modifier
-                                .swipableCard(
-                                    state = state,
-                                    blockedDirections = listOf(Direction.Down),
-                                    onSwiped = {
-                                        // swipes are handled by the LaunchedEffect
-                                        // so that we track button clicks & swipes
-                                        // from the same place
-                                    },
-                                    onSwipeCancel = {
-                                        Log.d("Swipeable-Card", "Cancelled swipe")
-                                    }
-                                )
-                        } else {
-                            Modifier
-                        }
-                        CardView(
-                            modifier = modifier,
-                            text = card.text
-                        )
-                    }
-                    LaunchedEffect(card, state.swipedDirection) {
-                        if (state.swipedDirection != null) {
-                            if (state.swipedDirection == Direction.Right){
-                                cardViewModel.addPointsToScore(card.points)
-                            } else if (state.swipedDirection == Direction.Left){
-                                cardViewModel.addMissCard()
-                            }
-
-                            //Check if there are more cards
-                            if (cardUiState.itemList.last().id == card.id){
-                                countDownViewModel.noMoreCards()
-                            }
-                        }
-                    }
-                }
-            }
-            Column (
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                if (timeIsUp){
-                    context.toast("Se ha acabado el tiempo")
-                }
-
-                CountDownIndicator(
-                    Modifier.padding(top = 10.dp),
-                    progress = progress,
-                    time = time,
-                    size = 100,
-                    stroke = 12
-                )
-                Row(Modifier
-                    .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    BigCircleButton(
-                        onClick = { onErrorButton(isPlaying) },
-                        icon = Icons.Default.Close
-                    )
-                    BigCircleButton(
-                        onClick = { onAcceptButton(isPlaying) },
-                        icon = Icons.Default.Check
-                    )
-                }
-                AnimatedVisibility(
-                    visible = !timeIsUp,
-                    enter = fadeIn(),
-                    exit = fadeOut()
-                ) {
-
-                }
-            }
-        }
+        SetTimeIsRunningScreen(timeIsUp)
     }
 
     AnimatedVisibility(
@@ -212,7 +111,118 @@ fun CardsDisplayScreen(
         SetTimeIsUpScreen()
     }
 }
-@Preview(showBackground = true)
+
+@Composable
+@OptIn(ExperimentalSwipeableCardApi::class, ExperimentalCoilApi::class)
+private fun SetTimeIsRunningScreen(
+    timeIsUp: Boolean
+) {
+    val time by countDownViewModel.time.observeAsState(Utility.TIME_COUNTDOWN.formatTime())
+    val progress by countDownViewModel.progress.observeAsState(1.00F)
+    val isPlaying by countDownViewModel.isPlaying.observeAsState(false)
+    val context = LocalContext.current
+    val cardUiState by cardViewModel.cardUiState.collectAsState()
+
+    cardStates = cardUiState.itemList.reversed()
+        .map { it to rememberSwipeableCardState() }
+
+    ConstraintLayout(
+        constraintSet = constraint,
+        Modifier
+            .fillMaxSize()
+            .paint( // Background image
+                painter = rememberImagePainter(R.drawable.double_bubble),
+                contentScale = ContentScale.Crop
+            ),
+    ) {
+        Box(
+            Modifier
+                .layoutId("topRef")
+                .padding(24.dp)
+                .fillMaxSize()
+        ) {
+            cardStates.forEach { (card, state) ->
+                if (state.swipedDirection == null) {
+                    // En caso de que no se de al botón, no se puede quitar la primera tarjeta
+                    val modifier = if (isPlaying) {
+                        Modifier
+                            .swipableCard(
+                                state = state,
+                                blockedDirections = listOf(Direction.Down),
+                                onSwiped = {
+                                    // swipes are handled by the LaunchedEffect
+                                    // so that we track button clicks & swipes
+                                    // from the same place
+                                },
+                                onSwipeCancel = {
+                                    Log.d("Swipeable-Card", "Cancelled swipe")
+                                }
+                            )
+                    } else {
+                        Modifier
+                    }
+                    CardView(
+                        modifier = modifier,
+                        text = card.text
+                    )
+                }
+                LaunchedEffect(card, state.swipedDirection) {
+                    if (state.swipedDirection != null) {
+                        if (state.swipedDirection == Direction.Right) {
+                            cardViewModel.addPointsToScore(card.points)
+                        } else if (state.swipedDirection == Direction.Left) {
+                            cardViewModel.addMissCard()
+                        }
+
+                        //Check if there are more cards
+                        if (cardUiState.itemList.last().id == card.id) {
+                            countDownViewModel.noMoreCards()
+                        }
+                    }
+                }
+            }
+        }
+        Column(Modifier
+            .layoutId("bottomRef"),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (timeIsUp) {
+                context.toast("Se ha acabado el tiempo")
+            }
+
+            CountDownIndicator(
+                Modifier.padding(top = 10.dp),
+                progress = progress,
+                time = time,
+                size = 100,
+                stroke = 12
+            )
+            Row(
+                Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                BigCircleButton(
+                    onClick = { onErrorButton(isPlaying) },
+                    icon = Icons.Default.Close
+                )
+                BigCircleButton(
+                    onClick = { onAcceptButton(isPlaying) },
+                    icon = Icons.Default.Check
+                )
+            }
+            AnimatedVisibility(
+                visible = !timeIsUp,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+
+            }
+        }
+    }
+}
+
+
 @Composable
 private fun SetTimeIsUpScreen(){
     val score by cardViewModel.score.collectAsState()
@@ -260,6 +270,23 @@ private fun onErrorButton(isPlaying: Boolean){
     }
 }
 
+val constraint = ConstraintSet {
+    val topRef = createRefFor("topRef")
+    val bottomRef = createRefFor("bottomRef")
+
+    constrain(topRef) {
+        top.linkTo(parent.top)
+        bottom.linkTo(bottomRef.top)
+        width = Dimension.matchParent
+        height = Dimension.fillToConstraints
+    }
+
+    constrain(bottomRef){
+        bottom.linkTo(parent.bottom)
+        height = Dimension.wrapContent
+        width = Dimension.matchParent
+    }
+}
 
 @Composable
 private fun BigCircleButton(
@@ -378,4 +405,3 @@ fun CardView(
         }
     }
 }
-

@@ -1,4 +1,4 @@
-package com.juegosdemesa.saltaconejo.data
+package com.juegosdemesa.saltaconejo.ui.home
 
 import android.os.CountDownTimer
 import androidx.lifecycle.LiveData

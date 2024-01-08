@@ -100,4 +100,7 @@ dependencies {
     implementation ("com.google.dagger:hilt-android:$hiltVersion")
     ksp ("com.google.dagger:hilt-android-compiler:$hiltVersion")
     implementation ("androidx.hilt:hilt-navigation-compose:1.1.0")
+
+    //ConstrainLayout
+    implementation ("androidx.constraintlayout:constraintlayout-compose:1.0.1")
 }
