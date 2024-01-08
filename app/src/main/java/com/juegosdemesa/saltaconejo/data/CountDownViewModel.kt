@@ -25,17 +25,17 @@ class CountDownViewModel : ViewModel() {
 
     //hold data for timeUp view as boolean
     //private
-    private val _timeIsUp = MutableLiveData(false)
+    private val _isTimeUp = MutableLiveData(false)
 
     //accessed publicly
-    val timeIsUp : LiveData<Boolean> get() =  _timeIsUp
+    val isTimeUp : LiveData<Boolean> get() =  _isTimeUp
     //endregion
 
     //region Private methods
     private fun timeIsUp() {
         countDownTimer?.cancel()
         handleTimerValues(false, 0L.formatTime(), 0.0F)
-        _timeIsUp.postValue(true)
+        _isTimeUp.postValue(true)
     }
 
     fun startTimer() {
@@ -59,5 +59,9 @@ class CountDownViewModel : ViewModel() {
         _progress.value = progress
     }
     //endregion
+
+    fun noMoreCards(){
+        timeIsUp()
+    }
 
 }

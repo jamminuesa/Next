@@ -6,7 +6,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
@@ -40,6 +40,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.paint
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -54,7 +55,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
@@ -78,39 +78,48 @@ object QuestionsDestination: NavigationDestination {
     override val titleRes = R.string.app_name
 }
 
-private lateinit var viewModel: CountDownViewModel
+private lateinit var countDownViewModel: CountDownViewModel
 private lateinit var cardStates: List<Pair<Card, SwipeableCardState>>
+private lateinit var cardViewModel: CardViewModel
 private lateinit var scope: CoroutineScope
 
-@OptIn(ExperimentalSwipeableCardApi::class)
+@OptIn(ExperimentalSwipeableCardApi::class, ExperimentalCoilApi::class)
 @Preview(showBackground = true)
 @Composable
 fun CardsDisplayScreen(
 //    cardViewModel: CardViewModel = hiltViewModel()
-    cardViewModel: CardViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ){
+    cardViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    countDownViewModel = viewModel()
+
     val context = LocalContext.current
     val cardUiState by cardViewModel.cardUiState.collectAsState()
+
     cardStates = cardUiState.itemList.reversed()
         .map { it to rememberSwipeableCardState() }
     scope = rememberCoroutineScope()
-    viewModel = viewModel()
 
-    val time by viewModel.time.observeAsState(Utility.TIME_COUNTDOWN.formatTime())
-    val progress by viewModel.progress.observeAsState(1.00F)
-    val isPlaying by viewModel.isPlaying.observeAsState(false)
-    val timeIsUp by viewModel.timeIsUp.observeAsState(false)
+
+    val time by countDownViewModel.time.observeAsState(Utility.TIME_COUNTDOWN.formatTime())
+    val progress by countDownViewModel.progress.observeAsState(1.00F)
+    val isPlaying by countDownViewModel.isPlaying.observeAsState(false)
+    val timeIsUp by countDownViewModel.isTimeUp.observeAsState(false)
 
     AnimatedVisibility(
         visible = !timeIsUp,
         enter = fadeIn(),
         exit = fadeOut()
     ) {
-        Column(Modifier
-            .fillMaxSize(),
+        Column(
+            Modifier
+                .fillMaxSize()
+                .paint( // Background image
+                    painter = rememberImagePainter(R.drawable.double_bubble),
+                    contentScale = ContentScale.Crop
+
+                ),
             verticalArrangement = Arrangement.SpaceEvenly
         ){
-
             Box(
                 Modifier
                     .padding(24.dp)
@@ -144,7 +153,16 @@ fun CardsDisplayScreen(
                     }
                     LaunchedEffect(card, state.swipedDirection) {
                         if (state.swipedDirection != null) {
-                            context.toast("You swiped ${state.swipedDirection}")
+                            if (state.swipedDirection == Direction.Right){
+                                cardViewModel.addPointsToScore(card.points)
+                            } else if (state.swipedDirection == Direction.Left){
+                                cardViewModel.addMissCard()
+                            }
+
+                            //Check if there are more cards
+                            if (cardUiState.itemList.last().id == card.id){
+                                countDownViewModel.noMoreCards()
+                            }
                         }
                     }
                 }
@@ -168,7 +186,7 @@ fun CardsDisplayScreen(
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     BigCircleButton(
-                        onClick = { onErrorButton() },
+                        onClick = { onErrorButton(isPlaying) },
                         icon = Icons.Default.Close
                     )
                     BigCircleButton(
@@ -197,19 +215,28 @@ fun CardsDisplayScreen(
 @Preview(showBackground = true)
 @Composable
 private fun SetTimeIsUpScreen(){
+    val score by cardViewModel.score.collectAsState()
+    val miss by cardViewModel.miss.collectAsState()
     Column(Modifier
         .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceEvenly
     ){
         Text(text = "Se ha acabado el tiempo")
-        Text(text = "Has conseguido X aciertos")
+        val text = if (score == 1) "acierto" else "aciertos"
+        Text(text = "Habéis conseguido $score $text")
+
+        val text1 = if (miss == 1) "carta" else "cartas"
+        Text(text = "Habéis pasado $miss $text1")
+        Button(onClick = { /*TODO*/ }) {
+            Text(text = "Ir a la siguiente pantalla")
+        }
     }
 }
 
 private fun onAcceptButton(isPlaying: Boolean){
     if (!isPlaying){
-        viewModel.startTimer()
+        countDownViewModel.startTimer()
     }
     scope.launch {
         val last = cardStates.reversed()
@@ -221,13 +248,15 @@ private fun onAcceptButton(isPlaying: Boolean){
     }
 }
 
-private fun onErrorButton(){
-    scope.launch {
-        val last = cardStates.reversed()
-            .firstOrNull {
-                it.second.offset.value == Offset(0f, 0f)
-            }?.second
-        last?.swipe(Direction.Left)
+private fun onErrorButton(isPlaying: Boolean){
+    if (isPlaying){
+        scope.launch {
+            val last = cardStates.reversed()
+                .firstOrNull {
+                    it.second.offset.value == Offset(0f, 0f)
+                }?.second
+            last?.swipe(Direction.Left)
+        }
     }
 }
 
@@ -326,7 +355,6 @@ fun CircularProgressIndicatorBackGround(
     })
 }
 
-@OptIn(ExperimentalCoilApi::class)
 @Composable
 fun CardView(
     modifier: Modifier,
@@ -334,11 +362,6 @@ fun CardView(
 ){
     Card (modifier){
         Box {
-            Image(contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
-                painter = rememberImagePainter(R.drawable.background),
-                contentDescription = null)
-            // Add more views here!
             Text(
                 text = text,
                 fontSize = 40.sp,

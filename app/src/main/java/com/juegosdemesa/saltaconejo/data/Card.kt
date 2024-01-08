@@ -1,6 +1,7 @@
 package com.juegosdemesa.saltaconejo.data
 
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "cards")
@@ -10,9 +11,19 @@ data class Card(
     val text: String,
     val category: Category,
     val difficulty: Int, // A value from 1 to 5
+    val points: Int = 1,
     val tags: List<String> = listOf()
 ){
+    @Ignore
+    constructor(text: String): this (
+        id = 0,
+        text = text,
+        category = Category.COUNTRY,
+        difficulty = 0,
+        points = 0,
+    )
     enum class Category(val value: Int) {
+        COVER(0),
         COUNTRY (1),
         PEOPLE(2),
         BRANDS (3),
