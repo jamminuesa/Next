@@ -34,6 +34,7 @@ import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
@@ -53,6 +54,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
@@ -62,10 +64,9 @@ import com.alexstyl.swipeablecard.SwipeableCardState
 import com.alexstyl.swipeablecard.rememberSwipeableCardState
 import com.alexstyl.swipeablecard.swipableCard
 import com.juegosdemesa.saltaconejo.R
+import com.juegosdemesa.saltaconejo.data.Card
 import com.juegosdemesa.saltaconejo.data.CountDownViewModel
-import com.juegosdemesa.saltaconejo.data.Person
 import com.juegosdemesa.saltaconejo.ui.navigation.NavigationDestination
-import com.juegosdemesa.saltaconejo.data.names
 import com.juegosdemesa.saltaconejo.util.Utility
 import com.juegosdemesa.saltaconejo.util.Utility.formatTime
 import com.juegosdemesa.saltaconejo.util.toast
@@ -73,20 +74,24 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 object QuestionsDestination: NavigationDestination {
-    override val route = "questions"
+    override val route = "cardsDisplay"
     override val titleRes = R.string.app_name
 }
 
 private lateinit var viewModel: CountDownViewModel
-private lateinit var cardStates: List<Pair<Person, SwipeableCardState>>
+private lateinit var cardStates: List<Pair<Card, SwipeableCardState>>
 private lateinit var scope: CoroutineScope
 
 @OptIn(ExperimentalSwipeableCardApi::class)
-@Preview (showBackground = true)
+@Preview(showBackground = true)
 @Composable
-fun QuestionsScreen(){
+fun CardsDisplayScreen(
+//    cardViewModel: CardViewModel = hiltViewModel()
+    cardViewModel: CardViewModel = viewModel(factory = AppViewModelProvider.Factory)
+){
     val context = LocalContext.current
-    cardStates = names.reversed()
+    val cardUiState by cardViewModel.cardUiState.collectAsState()
+    cardStates = cardUiState.itemList.reversed()
         .map { it to rememberSwipeableCardState() }
     scope = rememberCoroutineScope()
     viewModel = viewModel()
@@ -112,7 +117,7 @@ fun QuestionsScreen(){
                     .fillMaxWidth()
                     .aspectRatio(1f)
             ){
-                cardStates.forEach{ (matchProfile, state) ->
+                cardStates.forEach{ (card, state) ->
                     if (state.swipedDirection == null){
                         // En caso de que no se de al botón, no se puede quitar la primera tarjeta
                         val modifier = if (isPlaying){
@@ -134,10 +139,10 @@ fun QuestionsScreen(){
                         }
                         CardView(
                             modifier = modifier,
-                            text = matchProfile.name
+                            text = card.text
                         )
                     }
-                    LaunchedEffect(matchProfile, state.swipedDirection) {
+                    LaunchedEffect(card, state.swipedDirection) {
                         if (state.swipedDirection != null) {
                             context.toast("You swiped ${state.swipedDirection}")
                         }

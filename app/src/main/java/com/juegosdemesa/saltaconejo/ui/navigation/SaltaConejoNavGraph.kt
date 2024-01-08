@@ -8,7 +8,7 @@ import androidx.navigation.compose.composable
 import com.juegosdemesa.saltaconejo.ui.home.HomeDestination
 import com.juegosdemesa.saltaconejo.ui.home.HomeScreen
 import com.juegosdemesa.saltaconejo.ui.home.QuestionsDestination
-import com.juegosdemesa.saltaconejo.ui.home.QuestionsScreen
+import com.juegosdemesa.saltaconejo.ui.home.CardsDisplayScreen
 
 /**
  * Provides Navigation graph for the application.
@@ -31,7 +31,7 @@ fun SaltaConejoNavHost(
         }
 
         composable(route = QuestionsDestination.route){
-            QuestionsScreen()
+            CardsDisplayScreen()
         }
     }
 }

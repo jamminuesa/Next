@@ -1,6 +1,11 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    //For Room substitute for kapt
+    id("com.google.devtools.ksp")
+    //For Hilt
+    id("dagger.hilt.android.plugin")
+    id("kotlin-kapt")
 }
 
 android {
@@ -83,4 +88,16 @@ dependencies {
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
     implementation ("androidx.compose.runtime:runtime-livedata:1.5.4")
     implementation ("androidx.navigation:navigation-compose:2.7.6")
+
+    val roomVersion = "2.6.1"
+    //Room
+    implementation("androidx.room:room-runtime:$roomVersion")
+    ksp("androidx.room:room-compiler:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+
+    //Hilt
+    val hiltVersion = 2.44
+    implementation ("com.google.dagger:hilt-android:$hiltVersion")
+    ksp ("com.google.dagger:hilt-android-compiler:$hiltVersion")
+    implementation ("androidx.hilt:hilt-navigation-compose:1.1.0")
 }
