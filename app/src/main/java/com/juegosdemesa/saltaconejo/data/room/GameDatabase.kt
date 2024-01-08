@@ -75,6 +75,7 @@ abstract class GameDatabase: RoomDatabase() {
             return Instance ?: synchronized(this) {
                 Room.databaseBuilder(context, GameDatabase::class.java, DATABASE_NAME)
                     .fallbackToDestructiveMigration()
+                    .createFromAsset("salta_conejo.db")
                     .addCallback(ExpensesDatabaseCallbackLegacy(scope))
                     .build()
                     .also { Instance = it }
