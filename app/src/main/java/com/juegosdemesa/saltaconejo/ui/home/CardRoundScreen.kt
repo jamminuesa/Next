@@ -189,6 +189,7 @@ private fun SetTimeIsRunningScreen(
                 }
                 LaunchedEffect(card, state.swipedDirection) {
                     if (state.swipedDirection != null) {
+                            cardViewModel.addSeenCard(card)
                         if (state.swipedDirection == Direction.Right) {
                             cardViewModel.addPointsToScore(card.points)
                         } else if (state.swipedDirection == Direction.Left) {
@@ -279,6 +280,7 @@ private fun SetTimeIsUpScreen(
         } else {
             Button(onClick = {
                 gameViewModel.markRoundAsCompleted(round)
+                cardViewModel.markSeenCardsAsRecentlyDisplay()
                 navigateToNextRound.invoke()
             }
             ) {

@@ -44,6 +44,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.juegosdemesa.saltaconejo.R
 import com.juegosdemesa.saltaconejo.SaltaConejoTopAppBar
 import com.juegosdemesa.saltaconejo.data.model.Round
@@ -62,12 +63,15 @@ lateinit var gViewModel: GameViewModel
 @Composable
 fun NewGameScreen(
     navigateToCardRound: () -> Unit,
-    viewModel: GameViewModel,
+    vewModel: GameViewModel,
 ){
-    gViewModel  = viewModel
+    val cardViewModel: CardViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    gViewModel  = vewModel
     val teamList by gViewModel.teamList.collectAsState()
     val roundList by gViewModel.simpleRoundList.collectAsState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+
+    cardViewModel.resetCardDisplay()
 
     Scaffold(
         modifier = Modifier

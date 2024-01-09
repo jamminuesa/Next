@@ -17,7 +17,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CardViewModel @Inject constructor(
-    repository: DatabaseRepository
+    private val repository: DatabaseRepository
 ): ViewModel() {
     private val cardCategory = MutableStateFlow(Card.Category.COVER)
 
@@ -62,6 +62,21 @@ class CardViewModel @Inject constructor(
             val temp = miss.value + 1
             _miss.emit(temp)
         }
+    }
+
+
+    val cardSeen: MutableList<Card> = mutableListOf()
+
+    fun addSeenCard(card: Card){
+        cardSeen.add(card)
+    }
+
+    fun markSeenCardsAsRecentlyDisplay() = viewModelScope.launch {
+        repository.markCardAsRecentlyDisplayed(cardSeen)
+    }
+
+    fun resetCardDisplay() = viewModelScope.launch {
+        repository.markAllCardsAsNotRecentlyDisplay()
     }
 
     companion object {
