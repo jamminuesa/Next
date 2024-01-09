@@ -1,12 +1,14 @@
 package com.juegosdemesa.saltaconejo.ui.home
 
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,6 +46,7 @@ import androidx.compose.ui.draw.paint
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -68,6 +71,7 @@ import com.alexstyl.swipeablecard.rememberSwipeableCardState
 import com.alexstyl.swipeablecard.swipableCard
 import com.juegosdemesa.saltaconejo.R
 import com.juegosdemesa.saltaconejo.data.model.Card
+import com.juegosdemesa.saltaconejo.data.model.Round
 import com.juegosdemesa.saltaconejo.ui.navigation.NavigationDestination
 import com.juegosdemesa.saltaconejo.util.Utility
 import com.juegosdemesa.saltaconejo.util.Utility.formatTime
@@ -75,7 +79,7 @@ import com.juegosdemesa.saltaconejo.util.toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-object QuestionsDestination: NavigationDestination {
+object CardRoundDestination: NavigationDestination {
     override val route = "cardsDisplay"
     override val titleRes = R.string.app_name
 }
@@ -83,39 +87,52 @@ object QuestionsDestination: NavigationDestination {
 private lateinit var countDownViewModel: CountDownViewModel
 private lateinit var cardStates: List<Pair<Card, SwipeableCardState>>
 private lateinit var cardViewModel: CardViewModel
+private lateinit var gameViewModel: GameViewModel
 private lateinit var scope: CoroutineScope
 
 
 @Composable
-fun CardsDisplayScreen(
-//    cardViewModel: CardViewModel = hiltViewModel()
-){
+fun CardRoundScreen(
+    navigateToNextRound: () -> Unit,
+    navigateToEndGame: () -> Unit,
+    viewModel: GameViewModel
+) {
+    gameViewModel = viewModel
     cardViewModel = viewModel(factory = AppViewModelProvider.Factory)
     countDownViewModel = viewModel()
     scope = rememberCoroutineScope()
 
     val timeIsUp by countDownViewModel.isTimeUp.observeAsState(false)
+    val round by gameViewModel.nextRound.collectAsState()
+    cardViewModel.setCardCategory(round.type)
 
     AnimatedVisibility(
         visible = !timeIsUp,
         enter = fadeIn(),
         exit = fadeOut()
     ) {
-        SetTimeIsRunningScreen(timeIsUp)
+        SetTimeIsRunningScreen(
+            timeIsUp,
+            round
+        )
     }
 
     AnimatedVisibility(
         visible = timeIsUp,
         enter = fadeIn(),
         exit = fadeOut()) {
-        SetTimeIsUpScreen()
+        SetTimeIsUpScreen(
+            navigateToNextRound,
+            navigateToEndGame
+        )
     }
 }
 
 @Composable
 @OptIn(ExperimentalSwipeableCardApi::class, ExperimentalCoilApi::class)
 private fun SetTimeIsRunningScreen(
-    timeIsUp: Boolean
+    timeIsUp: Boolean,
+    round: Round
 ) {
     val time by countDownViewModel.time.observeAsState(Utility.TIME_COUNTDOWN.formatTime())
     val progress by countDownViewModel.progress.observeAsState(1.00F)
@@ -123,7 +140,9 @@ private fun SetTimeIsRunningScreen(
     val context = LocalContext.current
     val cardUiState by cardViewModel.cardUiState.collectAsState()
 
-    cardStates = cardUiState.itemList.reversed()
+    cardStates = cardUiState.itemList
+        .toMutableList()
+        .reversed()
         .map { it to rememberSwipeableCardState() }
 
     ConstraintLayout(
@@ -132,6 +151,7 @@ private fun SetTimeIsRunningScreen(
             .fillMaxSize()
             .paint( // Background image
                 painter = rememberImagePainter(R.drawable.double_bubble),
+                colorFilter = ColorFilter.tint(round.team.color),
                 contentScale = ContentScale.Crop
             ),
     ) {
@@ -163,7 +183,8 @@ private fun SetTimeIsRunningScreen(
                     }
                     CardView(
                         modifier = modifier,
-                        text = card.text
+                        text = card.text,
+                        color = round.type.color
                     )
                 }
                 LaunchedEffect(card, state.swipedDirection) {
@@ -223,10 +244,21 @@ private fun SetTimeIsRunningScreen(
 }
 
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-private fun SetTimeIsUpScreen(){
+private fun SetTimeIsUpScreen(
+    navigateToNextRound: () -> Unit,
+    navigateToEndGame: () -> Unit
+){
     val score by cardViewModel.score.collectAsState()
     val miss by cardViewModel.miss.collectAsState()
+
+    val round =  gameViewModel.nextRound.value
+    round.score = score
+    round.miss = miss
+
+    val isGameOver by gameViewModel.isGameOver.collectAsState()
+
     Column(Modifier
         .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -238,11 +270,24 @@ private fun SetTimeIsUpScreen(){
 
         val text1 = if (miss == 1) "carta" else "cartas"
         Text(text = "Habéis pasado $miss $text1")
-        Button(onClick = { /*TODO*/ }) {
-            Text(text = "Ir a la siguiente pantalla")
+
+        if (isGameOver){
+            Text(text = "Se acabó lo que se daba")
+            Button(onClick = navigateToEndGame) {
+                Text(text = "Ver puntuaciones finales")
+            }
+        } else {
+            Button(onClick = {
+                gameViewModel.markRoundAsCompleted(round)
+                navigateToNextRound.invoke()
+            }
+            ) {
+                Text(text = "Ir a la siguiente pantalla")
+            }
         }
     }
 }
+
 
 private fun onAcceptButton(isPlaying: Boolean){
     if (!isPlaying){
@@ -385,10 +430,13 @@ fun CircularProgressIndicatorBackGround(
 @Composable
 fun CardView(
     modifier: Modifier,
-    text: String
+    text: String,
+    color: Color
 ){
     Card (modifier){
-        Box {
+        Box (
+            Modifier.background(color)
+        ){
             Text(
                 text = text,
                 fontSize = 40.sp,

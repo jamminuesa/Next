@@ -6,6 +6,5 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class DatabaseRepository @Inject constructor(private val cardDao: CardDao) {
-
-    fun getAllItemsStream(): Flow<List<Card>> = cardDao.getAllCards()
+    fun getCardsByType(cardType: Card.Category) = cardDao.getAllByTypeCards(cardType.value)
 }

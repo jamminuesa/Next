@@ -5,9 +5,10 @@ import androidx.room.Ignore
 data class Round(
     val id: Int,
     val team: Team,
-    val score: Int = 0,
-    val miss: Int = 0,
-    val type: Card.Category
+    var score: Int = 0,
+    var miss: Int = 0,
+    val type: Card.Category,
+    var isRoundComplete: Boolean = false
 ){
     @Ignore
     constructor(id: Int): this(
@@ -20,11 +21,11 @@ data class Round(
         fun generateRounds(teams: List<Team>): MutableList<Round> {
             var roundCounter = 0
             val mutableList = mutableListOf<Round>()
-            teams.forEach { team ->
-                DEFAULT_GAME_ROUNDS.forEach {type ->
-                    val round = Round(id = roundCounter, team = team, type = type)
-                    mutableList.add(round)
-                    roundCounter++
+            DEFAULT_GAME_ROUNDS.forEach {type ->
+                teams.forEach { team ->
+                val round = Round(id = roundCounter, team = team, type = type)
+                mutableList.add(round)
+                roundCounter++
                 }
             }
             return mutableList

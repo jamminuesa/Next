@@ -5,9 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.juegosdemesa.saltaconejo.data.DatabaseRepository
 import com.juegosdemesa.saltaconejo.data.model.Card
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -17,19 +19,29 @@ import javax.inject.Inject
 class CardViewModel @Inject constructor(
     repository: DatabaseRepository
 ): ViewModel() {
-    val cardUiState: StateFlow<CardsUiState> =
-        repository.getAllItemsStream()
-            .map {// Add a cover
-                val modifiedList = it.toMutableList()
-                modifiedList.add(0, Card("Dale a ✓ para comenzar"))
-                modifiedList
-            }
-            .map { CardsUiState(it) }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-                initialValue = CardsUiState()
-            )
+    private val cardCategory = MutableStateFlow(Card.Category.COVER)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val cardUiState: StateFlow<CardsUiState> = cardCategory
+        .flatMapLatest { type ->
+            repository.getCardsByType(type)
+                .map {// Add a cover
+                    val modifiedList = it.toMutableList()
+                    modifiedList.add(0, Card("Dale a ✓ para comenzar"))
+                    CardsUiState(modifiedList)
+                }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+            initialValue = CardsUiState()
+        )
+
+    fun setCardCategory(category: Card.Category){
+        viewModelScope.launch {
+            cardCategory.emit(category)
+        }
+    }
 
     //region States
     private val _score = MutableStateFlow(0)

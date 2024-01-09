@@ -19,15 +19,14 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDatabase(
-        @ApplicationContext appContext: Context,
-        callback: GameDatabase.ExpensesDatabaseCallback
+        @ApplicationContext appContext: Context
     ): GameDatabase {
 
         val builder =
             Room.databaseBuilder(appContext, GameDatabase::class.java,
                 GameDatabase.DATABASE_NAME)
                 .fallbackToDestructiveMigration()
-                .addCallback(callback)
+                .createFromAsset("next.db")
 
         return builder.build()
     }

@@ -1,5 +1,8 @@
 package com.juegosdemesa.saltaconejo.ui.home
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,7 +44,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.juegosdemesa.saltaconejo.R
 import com.juegosdemesa.saltaconejo.SaltaConejoTopAppBar
 import com.juegosdemesa.saltaconejo.data.model.Round
@@ -55,15 +57,16 @@ object NewGameDestination: NavigationDestination {
     override val titleRes = R.string.new_game
 }
 
-lateinit var newGameViewModel: NewGameViewModel
+lateinit var gViewModel: GameViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewGameScreen(
-    navigateToQuestions:() -> Unit,
+    navigateToCardRound: () -> Unit,
+    viewModel: GameViewModel,
 ){
-    newGameViewModel  = viewModel()
-    val teamList by newGameViewModel.teamList.collectAsState()
-    val roundList by newGameViewModel.simpleRoundList.collectAsState()
+    gViewModel  = viewModel
+    val teamList by gViewModel.teamList.collectAsState()
+    val roundList by gViewModel.simpleRoundList.collectAsState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold(
@@ -78,15 +81,21 @@ fun NewGameScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = navigateToQuestions,
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.padding(12.dp)
+            AnimatedVisibility(
+                visible = roundList.isNotEmpty(),
+                enter = scaleIn(),
+                exit = scaleOut()
             ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowForward,
-                    contentDescription = null
-                )
+                FloatingActionButton(
+                    onClick = navigateToCardRound,
+                    shape = MaterialTheme.shapes.medium,
+                    modifier = Modifier.padding(12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowForward,
+                        contentDescription = null
+                    )
+                }
             }
         },
     ) { innerPadding ->
@@ -158,7 +167,7 @@ fun TeamHeader(
                 style = MaterialTheme.typography.titleLarge
             )
             Button(
-                onClick = { newGameViewModel.addNewAutoGenerateTeam() },
+                onClick = { gViewModel.addNewAutoGenerateTeam() },
                 // Uses ButtonDefaults.ContentPadding by default
                 contentPadding = PaddingValues(
                     start = 20.dp,

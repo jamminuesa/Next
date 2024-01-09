@@ -24,6 +24,6 @@ interface CardDao {
     @Query("SELECT * from cards WHERE id = :id")
     fun getCard(id: Int): Flow<Card>
 
-    @Query("SELECT * from cards ORDER BY RANDOM() LIMIT 10")
-    fun getAllCards(): Flow<List<Card>>
+    @Query("SELECT * from cards WHERE category = :type ORDER BY RANDOM()")
+    fun getAllByTypeCards(type: Int): Flow<List<Card>>
 }

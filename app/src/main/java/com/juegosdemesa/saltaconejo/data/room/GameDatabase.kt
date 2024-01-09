@@ -5,12 +5,8 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.juegosdemesa.saltaconejo.data.model.Card
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import javax.inject.Inject
-import javax.inject.Provider
 
 @Database(
     entities = [Card::class],
@@ -20,49 +16,6 @@ import javax.inject.Provider
 @TypeConverters(Converters::class)
 abstract class GameDatabase: RoomDatabase() {
     abstract fun cardDao(): CardDao
-
-
-    class ExpensesDatabaseCallback @Inject constructor (
-        private val database: Provider<GameDatabase>,
-        private val applicationScope: CoroutineScope
-    ) : Callback() {
-
-        override fun onCreate(db: SupportSQLiteDatabase) {
-            super.onCreate(db)
-
-            applicationScope.launch {
-                prePopulateDatabase(database.get())
-            }
-        }
-
-        private suspend fun prePopulateDatabase( db: GameDatabase) {
-            val cardDao = db.cardDao()
-            cardDao.insertAll(Card.CARD_DECK)
-        }
-    }
-
-    class ExpensesDatabaseCallbackLegacy @Inject constructor (
-        private val scope: CoroutineScope
-    ) : Callback() {
-
-        override fun onCreate(db: SupportSQLiteDatabase) {
-            super.onCreate(db)
-
-
-            Instance?.let {
-                scope.launch {
-                    prePopulateDatabase(it)
-                }
-            }
-        }
-
-        private suspend fun prePopulateDatabase( db: GameDatabase) {
-            val cardDao = db.cardDao()
-            Card.CARD_DECK.forEach {
-                cardDao.insert(it)
-            }
-        }
-    }
 
     companion object{
         const val DATABASE_NAME = "salta_conejo.db"
@@ -75,8 +28,7 @@ abstract class GameDatabase: RoomDatabase() {
             return Instance ?: synchronized(this) {
                 Room.databaseBuilder(context, GameDatabase::class.java, DATABASE_NAME)
                     .fallbackToDestructiveMigration()
-                    .createFromAsset("salta_conejo.db")
-                    .addCallback(ExpensesDatabaseCallbackLegacy(scope))
+                    .createFromAsset("next.db")
                     .build()
                     .also { Instance = it }
             }
