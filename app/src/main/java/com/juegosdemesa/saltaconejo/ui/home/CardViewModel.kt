@@ -2,8 +2,8 @@ package com.juegosdemesa.saltaconejo.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.juegosdemesa.saltaconejo.data.Card
 import com.juegosdemesa.saltaconejo.data.DatabaseRepository
+import com.juegosdemesa.saltaconejo.data.model.Card
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -21,7 +21,7 @@ class CardViewModel @Inject constructor(
         repository.getAllItemsStream()
             .map {// Add a cover
                 val modifiedList = it.toMutableList()
-                modifiedList.add(0,Card("Dale a ✓ para comenzar"))
+                modifiedList.add(0, Card("Dale a ✓ para comenzar"))
                 modifiedList
             }
             .map { CardsUiState(it) }

@@ -6,7 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.juegosdemesa.saltaconejo.data.Card
+import com.juegosdemesa.saltaconejo.data.model.Card
 import kotlinx.coroutines.flow.Flow
 
 @Dao

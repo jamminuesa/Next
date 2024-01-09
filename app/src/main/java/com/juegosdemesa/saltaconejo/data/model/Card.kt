@@ -1,8 +1,10 @@
-package com.juegosdemesa.saltaconejo.data
+package com.juegosdemesa.saltaconejo.data.model
 
+import androidx.compose.ui.graphics.Color
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
+import com.juegosdemesa.saltaconejo.util.Utility
 
 @Entity(tableName = "cards")
 data class Card(
@@ -22,14 +24,17 @@ data class Card(
         difficulty = 0,
         points = 0,
     )
-    enum class Category(val value: Int) {
-        COVER(0),
-        COUNTRY (1),
-        PEOPLE(2),
-        BRANDS (3),
-        SPORTS(4),
-        MUSIC(5),
-        ACTIONS(6)
+    enum class Category(
+        val value: Int,
+        val text: String,
+        val color: Color) {
+        COVER(0, "", Color.White),
+        COUNTRY(1, "País", Utility.hexColorToColor("#77dd77")),
+        PEOPLE(2, "Personajes", Utility.hexColorToColor("#77dd77")),
+        BRANDS(3, "Marcas", Utility.hexColorToColor("#77dd77")),
+        SPORTS(4, "Deportes", Utility.hexColorToColor("#84b6f4")),
+        MUSIC(5, "Música", Utility.hexColorToColor("#84b6f4")),
+        ACTIONS(6, "Accionesw", Utility.hexColorToColor("#84b6f4"))
     }
     
     companion object{

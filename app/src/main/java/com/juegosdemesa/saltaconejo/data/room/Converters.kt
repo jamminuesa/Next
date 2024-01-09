@@ -1,7 +1,7 @@
 package com.juegosdemesa.saltaconejo.data.room
 
 import androidx.room.TypeConverter
-import com.juegosdemesa.saltaconejo.data.Card
+import com.juegosdemesa.saltaconejo.data.model.Card
 
 /**
  * Created by Juan on 13/6/18.

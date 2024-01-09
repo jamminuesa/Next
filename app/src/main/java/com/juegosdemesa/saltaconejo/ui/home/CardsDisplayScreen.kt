@@ -67,7 +67,7 @@ import com.alexstyl.swipeablecard.SwipeableCardState
 import com.alexstyl.swipeablecard.rememberSwipeableCardState
 import com.alexstyl.swipeablecard.swipableCard
 import com.juegosdemesa.saltaconejo.R
-import com.juegosdemesa.saltaconejo.data.Card
+import com.juegosdemesa.saltaconejo.data.model.Card
 import com.juegosdemesa.saltaconejo.ui.navigation.NavigationDestination
 import com.juegosdemesa.saltaconejo.util.Utility
 import com.juegosdemesa.saltaconejo.util.Utility.formatTime

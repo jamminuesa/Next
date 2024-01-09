@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,9 +27,10 @@ object HomeDestination: NavigationDestination {
     override val titleRes = R.string.app_name
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    navigateToQuestions:() -> Unit,
+    navigateToNewGame:() -> Unit,
 ){
     Scaffold(
         topBar = {
@@ -45,7 +47,7 @@ fun HomeScreen(
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
             Button(
-                onClick = navigateToQuestions,
+                onClick = navigateToNewGame,
 
                 shape = RoundedCornerShape(30),
                 modifier = Modifier
@@ -54,7 +56,7 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .padding(30.dp)
             ){
-                Text(text = "Ir a preguntas")
+                Text(text = stringResource(R.string.new_game))
             }
         }
     }
@@ -64,8 +66,6 @@ fun HomeScreen(
 @Composable
 fun PreviewHomeScreen(){
     SaltaConejoTheme {
-        HomeScreen {
-
-        }
+        HomeScreen {}
     }
 }
