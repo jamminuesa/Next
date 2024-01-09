@@ -6,7 +6,6 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.juegosdemesa.saltaconejo.data.model.Card
-import kotlinx.coroutines.CoroutineScope
 
 @Database(
     entities = [Card::class],
@@ -23,7 +22,7 @@ abstract class GameDatabase: RoomDatabase() {
         @Volatile
         private var Instance: GameDatabase? = null
 
-        fun getDatabase(context: Context, scope: CoroutineScope): GameDatabase {
+        fun getDatabase(context: Context): GameDatabase {
             // if the Instance is not null, return it, otherwise create a new database instance.
             return Instance ?: synchronized(this) {
                 Room.databaseBuilder(context, GameDatabase::class.java, DATABASE_NAME)

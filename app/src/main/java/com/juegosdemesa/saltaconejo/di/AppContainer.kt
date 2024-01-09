@@ -19,8 +19,6 @@ package com.juegosdemesa.saltaconejo.di
 import android.content.Context
 import com.juegosdemesa.saltaconejo.data.DatabaseRepository
 import com.juegosdemesa.saltaconejo.data.room.GameDatabase
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 
 /**
  * App container for Dependency injection.
@@ -37,6 +35,6 @@ class AppDataContainer(private val context: Context) : AppContainer {
      * Implementation for [DatabaseRepository]
      */
     override val databaseRepository: DatabaseRepository by lazy {
-        DatabaseRepository(GameDatabase.getDatabase(context, CoroutineScope(SupervisorJob())).cardDao())
+        DatabaseRepository(GameDatabase.getDatabase(context).cardDao())
     }
 }
