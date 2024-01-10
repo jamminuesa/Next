@@ -11,6 +11,7 @@ import com.juegosdemesa.next.ui.home.HomeScreen
 import com.juegosdemesa.next.ui.home.CardRoundDestination
 import com.juegosdemesa.next.ui.home.CardRoundScreen
 import com.juegosdemesa.next.ui.home.EndGameDestination
+import com.juegosdemesa.next.ui.home.EndGameScreen
 import com.juegosdemesa.next.ui.home.GameViewModel
 import com.juegosdemesa.next.ui.home.NewGameDestination
 import com.juegosdemesa.next.ui.home.NewGameScreen
@@ -20,7 +21,7 @@ import com.juegosdemesa.next.ui.home.NewGameScreen
  */
 
 @Composable
-fun SaltaConejoNavHost(
+fun NextNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ){
@@ -48,6 +49,13 @@ fun SaltaConejoNavHost(
                 navigateToNextRound = {navController.navigate(CardRoundDestination.route)},
                 navigateToEndGame = {navController.navigate(EndGameDestination.route)},
                 gameViewModel
+            )
+        }
+
+        composable(route = HomeDestination.route){
+            EndGameScreen(
+                navigateToHome = {navController.navigate(HomeDestination.route)},
+                gameViewModel,
             )
         }
     }

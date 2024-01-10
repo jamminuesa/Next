@@ -62,6 +62,7 @@ import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.annotation.ExperimentalCoilApi
+import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
 import com.alexstyl.swipeablecard.Direction
 import com.alexstyl.swipeablecard.ExperimentalSwipeableCardApi
@@ -72,6 +73,7 @@ import com.juegosdemesa.next.R
 import com.juegosdemesa.next.data.model.Card
 import com.juegosdemesa.next.data.model.Round
 import com.juegosdemesa.next.ui.navigation.NavigationDestination
+import com.juegosdemesa.next.ui.theme.Typography
 import com.juegosdemesa.next.util.Utility
 import com.juegosdemesa.next.util.Utility.formatTime
 import kotlinx.coroutines.CoroutineScope
@@ -88,7 +90,6 @@ private lateinit var cardViewModel: CardViewModel
 private lateinit var gameViewModel: GameViewModel
 private lateinit var scope: CoroutineScope
 
-
 @Composable
 fun CardRoundScreen(
     navigateToNextRound: () -> Unit,
@@ -101,7 +102,7 @@ fun CardRoundScreen(
     scope = rememberCoroutineScope()
 
     val timeIsUp by countDownViewModel.isTimeUp.observeAsState(false)
-    val round by gameViewModel.nextRound.collectAsState()
+    val round by gameViewModel.round.collectAsState()
     cardViewModel.setCardCategory(round.type)
 
     AnimatedVisibility(
@@ -147,11 +148,19 @@ private fun SetTimeIsRunningScreen(
         Modifier
             .fillMaxSize()
             .paint( // Background image
-                painter = rememberImagePainter(R.drawable.double_bubble),
+                painter = rememberAsyncImagePainter(R.drawable.double_bubble),
                 colorFilter = ColorFilter.tint(round.team.color),
                 contentScale = ContentScale.Crop
             ),
     ) {
+        Text(
+            modifier = Modifier
+                .layoutId("headerRef")
+                .padding(8.dp),
+            textAlign = TextAlign.Center,
+            style = Typography.titleLarge,
+            text = round.team.name,
+        )
         Box(
             Modifier
                 .layoutId("topRef")
@@ -246,8 +255,9 @@ private fun SetTimeIsUpScreen(
 ){
     val score by cardViewModel.score.collectAsState()
     val miss by cardViewModel.miss.collectAsState()
+    val nextTeam by gameViewModel.nextRoundTeam.collectAsState()
 
-    val round =  gameViewModel.nextRound.value
+    val round =  gameViewModel.round.value
     round.score = score
     round.miss = miss
 
@@ -277,7 +287,7 @@ private fun SetTimeIsUpScreen(
                 navigateToNextRound.invoke()
             }
             ) {
-                Text(text = "Ir a la siguiente pantalla")
+                Text(text = "Turno del ${nextTeam?.name}")
             }
         }
     }
@@ -311,11 +321,18 @@ private fun onErrorButton(isPlaying: Boolean){
 }
 
 val constraint = ConstraintSet {
+    val headerRef = createRefFor("headerRef")
     val topRef = createRefFor("topRef")
     val bottomRef = createRefFor("bottomRef")
 
-    constrain(topRef) {
+    constrain(headerRef) {
         top.linkTo(parent.top)
+        width = Dimension.matchParent
+        height = Dimension.wrapContent
+    }
+
+    constrain(topRef) {
+        top.linkTo(headerRef.bottom)
         bottom.linkTo(bottomRef.top)
         width = Dimension.matchParent
         height = Dimension.fillToConstraints
