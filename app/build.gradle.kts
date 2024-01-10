@@ -9,11 +9,11 @@ plugins {
 }
 
 android {
-    namespace = "com.juegosdemesa.saltaconejo"
+    namespace = "com.juegosdemesa.next"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.juegosdemesa.saltaconejo"
+        applicationId = "com.juegosdemesa.next"
         minSdk = 28
         targetSdk = 34
         versionCode = 1
@@ -77,7 +77,7 @@ dependencies {
 
     implementation ("com.github.AsynctaskCoffee:tinderlikecardstack:1.0")
     implementation ("com.google.android.material:material:1.11.0")
-    implementation ("io.coil-kt:coil-compose:1.3.2")
+    implementation ("io.coil-kt:coil-compose:2.1.0")
 
     val navigationVersion = "2.7.6"
     implementation ("androidx.navigation:navigation-fragment-ktx:$navigationVersion")

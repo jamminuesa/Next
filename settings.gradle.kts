@@ -16,5 +16,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Salta Conejo"
+rootProject.name = "Next!"
 include(":app")
