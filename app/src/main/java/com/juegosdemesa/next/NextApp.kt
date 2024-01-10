@@ -13,11 +13,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.juegosdemesa.next.ui.navigation.SaltaConejoNavHost
+import com.juegosdemesa.next.ui.navigation.NextNavHost
 
 @Composable
 fun SaltaConejoApp(navController: NavHostController = rememberNavController()){
-    SaltaConejoNavHost(navController = navController)
+    NextNavHost(navController = navController)
 }
 
 /**
