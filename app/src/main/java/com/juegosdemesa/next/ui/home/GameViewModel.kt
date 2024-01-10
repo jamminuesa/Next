@@ -98,6 +98,54 @@ class GameViewModel : ViewModel() {
         }
     }
 
+    val gameResult: StateFlow<List<Team>> = _roundList
+        .map { calculateTotalResults(it) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+            initialValue = listOf()
+        )
+
+    private fun calculateTotalResults(round: List<Round>): List<Team>{
+        val list = round.map { it.team }.distinctBy { it.id }
+        list.forEach { team ->
+            val filter = round
+                .filter { it.team.id == team.id }
+            team.totalScore = filter
+                .sumOf { it.score }
+            team.totalMiss = filter
+                .sumOf { it.miss }
+        }
+        return list
+    }
+
+    val winner: StateFlow<String> = _roundList
+        .map { andTheWinnerIs(it) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+            initialValue = ""
+        )
+
+    private fun andTheWinnerIs(round: List<Round>): String{
+        val list = calculateTotalResults(round)
+        val maximumScore = list.maxBy { it.totalScore }.totalScore
+        val numberOfWinners = list.filter { it.totalScore == maximumScore }
+        return if (numberOfWinners.size == 1) {
+            "El ganador es: ${numberOfWinners[0].name}"
+        } else {
+            val stringBuilder = StringBuilder ("Ha habido un empate de ")
+            list.forEach {
+                stringBuilder.append("${it.name}, ")
+            }
+            stringBuilder.delete(stringBuilder.length - 2, stringBuilder.length)
+            stringBuilder.toString()
+        }
+
+    }
+
+
+
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
     }

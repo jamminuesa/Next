@@ -9,6 +9,8 @@ data class Team (
     val name: String,
     val color: Color
 ){
+    var totalScore = 0
+    var totalMiss = 0
 
     @Ignore
     constructor(id: Int): this(
