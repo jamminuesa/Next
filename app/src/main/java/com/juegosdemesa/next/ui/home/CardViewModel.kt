@@ -19,7 +19,7 @@ import javax.inject.Inject
 class CardViewModel @Inject constructor(
     private val repository: DatabaseRepository
 ): ViewModel() {
-    private val cardCategory = MutableStateFlow(Card.Category.COVER)
+    private val cardCategory = MutableStateFlow(Card.Category.DEFAULT)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val cardUiState: StateFlow<CardsUiState> = cardCategory
@@ -27,7 +27,7 @@ class CardViewModel @Inject constructor(
             repository.getCardsByType(type)
                 .map {// Add a cover
                     val modifiedList = it.toMutableList()
-                    modifiedList.add(0, Card(categoryToText(type)))
+                    modifiedList.add(0, Card(type.description))
                     CardsUiState(modifiedList)
                 }
         }
@@ -77,18 +77,6 @@ class CardViewModel @Inject constructor(
 
     fun resetCardDisplay() = viewModelScope.launch {
         repository.markAllCardsAsNotRecentlyDisplay()
-    }
-
-    private fun categoryToText(type: Card.Category): String{
-        return when(type){
-            Card.Category.COUNTRY -> "Describe con palabras estas cosas relacionadas con tu país"
-            Card.Category.PEOPLE -> "Describe a las siguientes personas y personajes"
-            Card.Category.BRANDS -> "Describe las marcas"
-            Card.Category.SPORTS -> "Representa con mímica estas acciones relacionadas con el deporte"
-            Card.Category.MUSIC -> "Representa con mímica estas acciones relacionadas con la música"
-            Card.Category.ACTIONS -> "Mediante mímica representa estas acciones"
-            else -> "Dale a ✓ para comenzar"
-        }
     }
 
     companion object {
