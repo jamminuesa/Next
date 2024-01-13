@@ -128,20 +128,23 @@ class GameViewModel : ViewModel() {
         )
 
     private fun andTheWinnerIs(round: List<Round>): String{
-        val list = calculateTotalResults(round)
-        val maximumScore = list.maxBy { it.totalScore }.totalScore
-        val numberOfWinners = list.filter { it.totalScore == maximumScore }
-        return if (numberOfWinners.size == 1) {
-            "El ganador es: ${numberOfWinners[0].name}"
-        } else {
-            val stringBuilder = StringBuilder ("Ha habido un empate de ")
-            list.forEach {
-                stringBuilder.append("${it.name}, ")
+        return if (round.isNotEmpty()){
+            val list = calculateTotalResults(round)
+            val maximumScore = list.maxBy { it.totalScore }.totalScore
+            val numberOfWinners = list.filter { it.totalScore == maximumScore }
+            return if (numberOfWinners.size == 1) {
+                "El ganador es: ${numberOfWinners[0].name}"
+            } else {
+                val stringBuilder = StringBuilder ("Ha habido un empate de ")
+                list.forEach {
+                    stringBuilder.append("${it.name}, ")
+                }
+                stringBuilder.delete(stringBuilder.length - 2, stringBuilder.length)
+                stringBuilder.toString()
             }
-            stringBuilder.delete(stringBuilder.length - 2, stringBuilder.length)
-            stringBuilder.toString()
+        } else {
+            ""
         }
-
     }
 
 

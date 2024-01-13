@@ -16,7 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import com.juegosdemesa.next.ui.navigation.NextNavHost
 
 @Composable
-fun SaltaConejoApp(navController: NavHostController = rememberNavController()){
+fun NextApp(navController: NavHostController = rememberNavController()){
     NextNavHost(navController = navController)
 }
 

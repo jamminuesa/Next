@@ -52,7 +52,7 @@ fun NextNavHost(
             )
         }
 
-        composable(route = HomeDestination.route){
+        composable(route = EndGameDestination.route){
             EndGameScreen(
                 navigateToHome = {navController.navigate(HomeDestination.route)},
                 gameViewModel,
