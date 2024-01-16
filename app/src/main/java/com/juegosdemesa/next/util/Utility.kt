@@ -30,14 +30,25 @@ object Utility {
         }
     }
 
-    fun generateCreamColorRand(seed: Int): Color {
+    fun colorToHexColor(color: Color): String {
+        // Convierte el color a su representación entera ARGB
+        val argb = (color.alpha * 255.0f + 0.5f).toInt() shl 24 or
+                (color.red * 255.0f + 0.5f).toInt() shl 16 or
+                (color.green * 255.0f + 0.5f).toInt() shl 8 or
+                (color.blue * 255.0f + 0.5f).toInt()
+
+        // Convierte el valor entero ARGB a su representación hexadecimal como una cadena
+        return String.format("#%08X", argb)
+    }
+
+    fun generateCreamColorRand(seed: Int): String {
         val random = Random(seed)
 
         val red = random.nextInt(100, 201)
         val green = random.nextInt(100, 201)
         val blue = random.nextInt(100, 201)
 
-        return Color(red, green, blue)
+        return colorToHexColor(Color(red, green, blue))
     }
 
 }

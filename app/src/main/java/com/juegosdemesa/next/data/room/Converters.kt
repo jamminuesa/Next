@@ -1,7 +1,10 @@
 package com.juegosdemesa.next.data.room
 
+import androidx.compose.ui.graphics.Color
 import androidx.room.TypeConverter
 import com.juegosdemesa.next.data.model.Card
+import com.juegosdemesa.next.data.model.Team
+import com.juegosdemesa.next.util.Utility
 
 /**
  * Created by Juan on 13/6/18.
@@ -26,4 +29,17 @@ class Converters {
 
     @TypeConverter
     fun fromCategory(value: Card.Category) = value.ordinal
+
+    @TypeConverter
+    fun fromTeam(value: Team) = value.id
+
+    @TypeConverter
+    fun toTeam(value: Int) = Team(value)
+
+
+    @TypeConverter
+    fun fromColor(value: Color): String = Utility.colorToHexColor(value)
+
+    @TypeConverter
+    fun toColor(value: String): Color = Utility.hexColorToColor(value)
 }

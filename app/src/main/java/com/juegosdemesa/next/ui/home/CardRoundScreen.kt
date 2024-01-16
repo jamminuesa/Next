@@ -96,23 +96,29 @@ fun CardRoundScreen(
     viewModel: GameViewModel
 ) {
     gameViewModel = viewModel
-    cardViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    cardViewModel = viewModel(factory = AppViewModelProvider.CardViewModelFactory)
     countDownViewModel = viewModel()
     scope = rememberCoroutineScope()
 
     val timeIsUp by countDownViewModel.isTimeUp.observeAsState(false)
     val round by gameViewModel.round.collectAsState()
-    cardViewModel.setCardCategory(round.type)
+    if (round != null){
+        cardViewModel.setCardCategory(round!!.type)
+    }
+
 
     AnimatedVisibility(
-        visible = !timeIsUp,
+        visible = !timeIsUp && round != null,
         enter = fadeIn(),
         exit = fadeOut()
     ) {
-        SetTimeIsRunningScreen(
-            timeIsUp,
-            round
-        )
+        if (round != null){
+            SetTimeIsRunningScreen(
+                timeIsUp,
+                round!!
+            )
+        }
+
     }
 
     AnimatedVisibility(
@@ -148,7 +154,7 @@ private fun SetTimeIsRunningScreen(
             .fillMaxSize()
             .paint( // Background image
                 painter = rememberAsyncImagePainter(R.drawable.double_bubble),
-                colorFilter = ColorFilter.tint(round.team.color),
+                colorFilter = ColorFilter.tint(round.team.toColor()),
                 contentScale = ContentScale.Crop
             ),
     ) {
@@ -256,10 +262,6 @@ private fun SetTimeIsUpScreen(
     val miss by cardViewModel.miss.collectAsState()
     val nextTeam by gameViewModel.nextRoundTeam.collectAsState()
 
-    val round =  gameViewModel.round.value
-    round.score = score
-    round.miss = miss
-
     val isGameOver by gameViewModel.isGameOver.collectAsState()
 
     Column(Modifier
@@ -276,17 +278,20 @@ private fun SetTimeIsUpScreen(
 
         if (isGameOver){
             Text(text = "Se acabó lo que se daba")
-            Button(onClick = navigateToEndGame) {
+            Button(onClick = {
+                gameViewModel.markRoundAsCompleted(score, miss)
+                navigateToEndGame.invoke()
+            }) {
                 Text(text = "Ver puntuaciones finales")
             }
         } else {
             Button(onClick = {
-                gameViewModel.markRoundAsCompleted(round)
+                gameViewModel.markRoundAsCompleted(score, miss)
                 cardViewModel.markSeenCardsAsRecentlyDisplay()
                 navigateToNextRound.invoke()
             }
             ) {
-                Text(text = "Turno del ${nextTeam?.name}")
+                Text(text = "Turno del ${nextTeam.team.name}")
             }
         }
     }

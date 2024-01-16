@@ -23,6 +23,7 @@ class CardViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val cardUiState: StateFlow<CardsUiState> = cardCategory
+
         .flatMapLatest { type ->
             repository.getCardsByType(type)
                 .map {// Add a cover

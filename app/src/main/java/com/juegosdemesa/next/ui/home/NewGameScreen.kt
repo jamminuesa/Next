@@ -65,7 +65,7 @@ fun NewGameScreen(
     navigateToCardRound: () -> Unit,
     vewModel: GameViewModel,
 ){
-    val cardViewModel: CardViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    val cardViewModel: CardViewModel = viewModel(factory = AppViewModelProvider.CardViewModelFactory)
     gViewModel  = vewModel
     val teamList by gViewModel.teamList.collectAsState()
     val roundList by gViewModel.simpleRoundList.collectAsState()
@@ -91,7 +91,10 @@ fun NewGameScreen(
                 exit = scaleOut()
             ) {
                 FloatingActionButton(
-                    onClick = navigateToCardRound,
+                    onClick = {
+                        vewModel.createNewGame()
+                        navigateToCardRound.invoke()
+                    },
                     shape = MaterialTheme.shapes.medium,
                     modifier = Modifier.padding(12.dp)
                 ) {
@@ -140,7 +143,7 @@ fun NewGameBodyPreview(){
 
     val list1 = mutableListOf<Round>()
     for (i in 1..4){
-        list1.add(Round(i))
+        list1.add(Round())
     }
     NewGameBody(
         teamList = list,
@@ -239,7 +242,7 @@ private fun TeamItem(
                 horizontalArrangement =  Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                ColoredDot(item.color, 10.dp)
+                ColoredDot(item.toColor(), 10.dp)
                 Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                 Text(
                     text = item.name,
@@ -395,7 +398,7 @@ fun RoundHeaderPreview(){
     NextTheme {
         val list = mutableListOf<Round>()
         for (i in 1..4){
-            list.add(Round(i))
+            list.add(Round())
         }
         RoundHeader( roundList = list)
     }
@@ -406,7 +409,7 @@ fun RoundHeaderPreview(){
 fun RoundListPreview(){
     val list = mutableListOf<Round>()
     for (i in 1..4){
-        list.add(Round(i))
+        list.add(Round())
     }
     RoundList(list)
 }
@@ -414,5 +417,5 @@ fun RoundListPreview(){
 @Preview(showBackground = true)
 @Composable
 fun RoundItemPreview(){
-    RoundItem(Round(0))
+    RoundItem(Round())
 }

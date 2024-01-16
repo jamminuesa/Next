@@ -35,6 +35,9 @@ class AppDataContainer(private val context: Context) : AppContainer {
      * Implementation for [DatabaseRepository]
      */
     override val databaseRepository: DatabaseRepository by lazy {
-        DatabaseRepository(GameDatabase.getDatabase(context).cardDao())
+        DatabaseRepository(
+            GameDatabase.getDatabase(context).cardDao(),
+            GameDatabase.getDatabase(context).gameDao()
+        )
     }
 }

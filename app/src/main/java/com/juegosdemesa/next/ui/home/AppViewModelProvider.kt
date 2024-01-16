@@ -27,10 +27,17 @@ import com.juegosdemesa.next.NextApplication
  * Provides Factory to create instance of ViewModel for the entire Inventory app
  */
 object AppViewModelProvider {
-    val Factory = viewModelFactory {
+    val CardViewModelFactory = viewModelFactory {
         // Initializer for ItemEntryViewModel
         initializer {
-            CardViewModel(saltaConejoApplication().container.databaseRepository)
+            CardViewModel(nextApplication().container.databaseRepository)
+
+        }
+    }
+
+    val GameViewModelFactory = viewModelFactory {
+        initializer {
+            GameViewModel(nextApplication().container.databaseRepository)
         }
     }
 }
@@ -39,5 +46,5 @@ object AppViewModelProvider {
  * Extension function to queries for [Application] object and returns an instance of
  * [NextApplication].
  */
-fun CreationExtras.saltaConejoApplication(): NextApplication =
+fun CreationExtras.nextApplication(): NextApplication =
     (this[AndroidViewModelFactory.APPLICATION_KEY] as NextApplication)

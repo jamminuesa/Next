@@ -6,13 +6,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.juegosdemesa.next.ui.home.HomeDestination
-import com.juegosdemesa.next.ui.home.HomeScreen
+import com.juegosdemesa.next.ui.home.AppViewModelProvider
 import com.juegosdemesa.next.ui.home.CardRoundDestination
 import com.juegosdemesa.next.ui.home.CardRoundScreen
 import com.juegosdemesa.next.ui.home.EndGameDestination
 import com.juegosdemesa.next.ui.home.EndGameScreen
 import com.juegosdemesa.next.ui.home.GameViewModel
+import com.juegosdemesa.next.ui.home.HomeDestination
+import com.juegosdemesa.next.ui.home.HomeScreen
 import com.juegosdemesa.next.ui.home.NewGameDestination
 import com.juegosdemesa.next.ui.home.NewGameScreen
 
@@ -25,7 +26,7 @@ fun NextNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ){
-    val gameViewModel: GameViewModel = viewModel()
+    val gameViewModel: GameViewModel = viewModel(factory = AppViewModelProvider.GameViewModelFactory)
     NavHost(
         navController = navController,
         startDestination = HomeDestination.route,
