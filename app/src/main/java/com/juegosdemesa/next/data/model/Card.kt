@@ -31,11 +31,14 @@ data class Card(
         val color: Color,
         val description: String) {
         DEFAULT(0, "", Color.White,""),
-        COUNTRY(1, "País", Utility.hexColorToColor("#77dd77"), "Describe con palabras estas cosas relacionadas con tu país"),
+        COUNTRY(1, "País", Utility.hexColorToColor("#77dd77"), "Describe con palabras lo siguiente relacionado con España"),
         PEOPLE(2, "Personajes", Utility.hexColorToColor("#77dd77"), "Describe a las siguientes personas y personajes"),
         BRANDS(3, "Marcas", Utility.hexColorToColor("#77dd77"), "Describe las marcas"),
         SPORTS(4, "Deportes", Utility.hexColorToColor("#84b6f4"), "Representa con mímica estas acciones relacionadas con el deporte"),
         MUSIC(5, "Música", Utility.hexColorToColor("#84b6f4"), "Representa con mímica estas acciones relacionadas con la música"),
-        ACTIONS(6, "Acciones", Utility.hexColorToColor("#84b6f4"), "Mediante mímica representa estas acciones")
+        ACTIONS(6, "Acciones", Utility.hexColorToColor("#84b6f4"), "Mediante mímica representa estas acciones"),
+        IMITATE(7, "Imitar", Utility.hexColorToColor("#fdfd96"), "Imita a los siguientes personajes"),
+        HUM(8, "Tararear", Utility.hexColorToColor("#fdfd96"), "Tararea las siguientes canciones"),
+        FINISH_THE_SONG(9, "Termina la canción", Utility.hexColorToColor("#fdfd96"), "Termina la canción"),
     }
 }

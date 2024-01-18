@@ -44,10 +44,13 @@ data class Round(
         private val DEFAULT_GAME_ROUNDS = listOf(
             Card.Category.COUNTRY,
             Card.Category.ACTIONS,
+            Card.Category.HUM,
             Card.Category.PEOPLE,
             Card.Category.SPORTS,
+            Card.Category.IMITATE,
             Card.Category.BRANDS,
             Card.Category.MUSIC,
+            Card.Category.FINISH_THE_SONG,
         )
     }
 }
