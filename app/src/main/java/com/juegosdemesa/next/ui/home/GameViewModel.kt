@@ -7,14 +7,17 @@ import com.juegosdemesa.next.data.model.Game
 import com.juegosdemesa.next.data.model.Round
 import com.juegosdemesa.next.data.model.RoundWithTeam
 import com.juegosdemesa.next.data.model.Team
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class GameViewModel(
+@HiltViewModel
+class GameViewModel @Inject constructor(
     private val repository: DatabaseRepository
 ) : ViewModel() {
 

@@ -60,6 +60,7 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberAsyncImagePainter
@@ -96,7 +97,7 @@ fun CardRoundScreen(
     viewModel: GameViewModel
 ) {
     gameViewModel = viewModel
-    cardViewModel = viewModel(factory = AppViewModelProvider.CardViewModelFactory)
+    cardViewModel = hiltViewModel()
     countDownViewModel = viewModel()
     scope = rememberCoroutineScope()
 

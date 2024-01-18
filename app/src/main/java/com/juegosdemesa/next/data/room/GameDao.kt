@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import com.juegosdemesa.next.data.model.Card
 import com.juegosdemesa.next.data.model.Round
@@ -33,6 +34,7 @@ interface GameDao {
     @Query("SELECT * FROM rounds WHERE gameId = :gameId AND isRoundComplete = 0 ORDER BY `order` LIMIT 1")
     fun getNextRound(gameId: String): Flow<Round>
 
+    @Transaction
     @Query("SELECT * FROM rounds WHERE gameId = :gameId AND isRoundComplete = 0 ORDER BY `order` LIMIT 1 OFFSET 1")
     fun getNextTeamRound(gameId: String): Flow<RoundWithTeam>
 

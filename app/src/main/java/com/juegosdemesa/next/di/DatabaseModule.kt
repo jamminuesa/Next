@@ -17,17 +17,17 @@ object DatabaseModule {
     fun provideCardDao(database: GameDatabase) = database.cardDao()
 
     @Provides
+    fun provideGameDao(database: GameDatabase) = database.gameDao()
+
+    @Provides
     @Singleton
     fun provideDatabase(
         @ApplicationContext appContext: Context
     ): GameDatabase {
-
-        val builder =
-            Room.databaseBuilder(appContext, GameDatabase::class.java,
+        return Room.databaseBuilder(appContext, GameDatabase::class.java,
                 GameDatabase.DATABASE_NAME)
                 .fallbackToDestructiveMigration()
                 .createFromAsset("next.db")
-
-        return builder.build()
+                .build()
     }
 }

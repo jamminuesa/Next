@@ -2,11 +2,10 @@ package com.juegosdemesa.next.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.juegosdemesa.next.ui.home.AppViewModelProvider
 import com.juegosdemesa.next.ui.home.CardRoundDestination
 import com.juegosdemesa.next.ui.home.CardRoundScreen
 import com.juegosdemesa.next.ui.home.EndGameDestination
@@ -26,7 +25,7 @@ fun NextNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ){
-    val gameViewModel: GameViewModel = viewModel(factory = AppViewModelProvider.GameViewModelFactory)
+    val gameViewModel: GameViewModel = hiltViewModel()
     NavHost(
         navController = navController,
         startDestination = HomeDestination.route,

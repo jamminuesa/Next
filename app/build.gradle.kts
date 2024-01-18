@@ -46,7 +46,7 @@ android {
         viewBinding = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.3"
     }
     packaging {
         resources {
@@ -96,10 +96,10 @@ dependencies {
     implementation("androidx.room:room-ktx:$roomVersion")
 
     //Hilt
-    val hiltVersion = 2.44
+    val hiltVersion = 2.47
     implementation ("com.google.dagger:hilt-android:$hiltVersion")
     ksp ("com.google.dagger:hilt-android-compiler:$hiltVersion")
-    implementation ("androidx.hilt:hilt-navigation-compose:1.1.0")
+    implementation ("androidx.hilt:hilt-navigation-compose:1.0.0")
 
     //ConstrainLayout
     implementation ("androidx.constraintlayout:constraintlayout-compose:1.0.1")

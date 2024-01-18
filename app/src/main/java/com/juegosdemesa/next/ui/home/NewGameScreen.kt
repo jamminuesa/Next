@@ -44,9 +44,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.juegosdemesa.next.R
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.juegosdemesa.next.NextTopAppBar
+import com.juegosdemesa.next.R
 import com.juegosdemesa.next.data.model.Round
 import com.juegosdemesa.next.data.model.Team
 import com.juegosdemesa.next.ui.navigation.NavigationDestination
@@ -65,7 +65,7 @@ fun NewGameScreen(
     navigateToCardRound: () -> Unit,
     vewModel: GameViewModel,
 ){
-    val cardViewModel: CardViewModel = viewModel(factory = AppViewModelProvider.CardViewModelFactory)
+    val cardViewModel: CardViewModel = hiltViewModel()
     gViewModel  = vewModel
     val teamList by gViewModel.teamList.collectAsState()
     val roundList by gViewModel.simpleRoundList.collectAsState()
