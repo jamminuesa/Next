@@ -50,7 +50,7 @@ data class Round(
             Card.Category.IMITATE,
             Card.Category.BRANDS,
             Card.Category.MUSIC,
-            Card.Category.FINISH_THE_SONG,
+//            Card.Category.FINISH_THE_SONG,
         )
     }
 }
