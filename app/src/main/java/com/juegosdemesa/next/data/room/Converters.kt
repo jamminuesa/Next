@@ -1,10 +1,7 @@
 package com.juegosdemesa.next.data.room
 
-import androidx.compose.ui.graphics.Color
 import androidx.room.TypeConverter
 import com.juegosdemesa.next.data.model.Card
-import com.juegosdemesa.next.data.model.Team
-import com.juegosdemesa.next.util.Utility
 
 /**
  * Created by Juan on 13/6/18.
@@ -31,15 +28,10 @@ class Converters {
     fun fromCategory(value: Card.Category) = value.ordinal
 
     @TypeConverter
-    fun fromTeam(value: Team) = value.id
-
-    @TypeConverter
-    fun toTeam(value: Int) = Team(value)
-
-
-    @TypeConverter
-    fun fromColor(value: Color): String = Utility.colorToHexColor(value)
-
-    @TypeConverter
-    fun toColor(value: String): Color = Utility.hexColorToColor(value)
+    fun toCategoryList(string: String): List<Card.Category>{
+        return string.split(separator).map { it.toInt() }.map {
+            Card.Category.entries.find { category ->
+                category.value == it } ?: throw IllegalArgumentException("El valor '$it' no es un valor " +
+                    "válido de la enumeración") }
+    }
 }

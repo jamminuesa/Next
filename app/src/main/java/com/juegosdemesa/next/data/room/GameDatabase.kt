@@ -5,10 +5,11 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.juegosdemesa.next.data.model.Card
 import com.juegosdemesa.next.data.model.Round
+import com.juegosdemesa.next.data.model.RoundModifier
 import com.juegosdemesa.next.data.model.Team
 
 @Database(
-    entities = [Card::class, Round::class, Team::class],
+    entities = [Card::class, Round::class, Team::class, RoundModifier::class],
     version = 1,
     exportSchema = false
 )
@@ -16,6 +17,7 @@ import com.juegosdemesa.next.data.model.Team
 abstract class GameDatabase: RoomDatabase() {
     abstract fun cardDao(): CardDao
     abstract fun gameDao(): GameDao
+    abstract fun roundModifierDao(): RoundModifierDao
 
     companion object{
         const val DATABASE_NAME = "next.db"

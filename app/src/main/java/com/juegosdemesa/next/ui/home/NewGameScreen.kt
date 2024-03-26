@@ -72,6 +72,7 @@ fun NewGameScreen(
     gViewModel  = vewModel
     val teamList by gViewModel.teamList.collectAsState()
     val roundList by gViewModel.simpleRoundList.collectAsState()
+    val checked by gViewModel.withModifiedRounds.collectAsState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     cardViewModel.resetCardDisplay()
@@ -114,7 +115,9 @@ fun NewGameScreen(
                 .padding(innerPadding)
                 .fillMaxSize(),
             teamList = teamList,
-            roundList = roundList)
+            roundList = roundList,
+            modificationsChecked = checked
+            )
 
     }
 }
@@ -125,12 +128,14 @@ fun NewGameScreen(
 fun NewGameBody(
     modifier: Modifier = Modifier,
     teamList: List<Team>,
-    roundList: List<Round>
+    roundList: List<Round>,
+    modificationsChecked: Boolean
 ){
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
     ) {
+        RoundModifierCheckbox(modificationsChecked)
         TeamHeader(teamList = teamList)
         RoundHeader(roundList = roundList)
     }
@@ -150,7 +155,8 @@ fun NewGameBodyPreview(){
     }
     NewGameBody(
         teamList = list,
-        roundList = list1
+        roundList = list1,
+        modificationsChecked = true
     )
 }
 
@@ -169,7 +175,7 @@ fun TeamHeader(
                 showDialog.value = it
             }
         ) { result ->
-            gViewModel.addNewAutoGenerateTeam(result)
+            gViewModel.addTeam(result)
         }
 
     Column(
@@ -190,7 +196,9 @@ fun TeamHeader(
                 style = MaterialTheme.typography.titleLarge
             )
             Button(
-                onClick = { gViewModel.addNewAutoGenerateTeam() },
+                onClick = {
+                    showDialog.value = true
+                          },
                 // Uses ButtonDefaults.ContentPadding by default
                 contentPadding = PaddingValues(
                     start = 20.dp,
@@ -227,6 +235,46 @@ private fun TeamList(
             )
         }
     }
+}
+
+
+@Composable
+private fun RoundModifierCheckbox(
+    checked: Boolean
+) {
+    val text = remember { mutableStateOf("Jugar sin modificadores de ronda") }
+
+    Row (
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ){
+
+        Text(
+            text = text.value,
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        Checkbox(
+            checked = checked,
+            onCheckedChange = {
+                gViewModel.isRoundModificationsChecked(it)
+                text.value = if (it) {
+                    "Jugar con modificadores de ronda"
+                } else {
+                    "Jugar sin modificadores de ronda"
+                }
+            }
+        )
+    }
+}
+
+@Preview (showBackground = true)
+@Composable
+fun CheckBoxPreview(){
+    RoundModifierCheckbox(false)
 }
 
 @Preview

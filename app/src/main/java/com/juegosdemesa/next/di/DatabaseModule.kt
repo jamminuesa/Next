@@ -13,6 +13,9 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 @Module
 object DatabaseModule {
+
+    @Provides
+    fun provideModifierRoundDao(database: GameDatabase) = database.roundModifierDao()
     @Provides
     fun provideCardDao(database: GameDatabase) = database.cardDao()
 

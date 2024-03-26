@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.juegosdemesa.next.data.DatabaseRepository
 import com.juegosdemesa.next.data.model.Game
 import com.juegosdemesa.next.data.model.Round
-import com.juegosdemesa.next.data.model.RoundWithTeam
+import com.juegosdemesa.next.data.model.RoundWithTeamAndModifier
 import com.juegosdemesa.next.data.model.Team
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,15 +24,21 @@ class GameViewModel @Inject constructor(
     private val _teamList = MutableStateFlow<List<Team>>(mutableListOf())
     val teamList: StateFlow<List<Team>> = _teamList
 
-    private val _roundList = mutableListOf<Round>()
+    private val _roundList = mutableListOf<RoundWithTeamAndModifier>()
+
+    private val _withModifiedRounds = MutableStateFlow(false)
+    val withModifiedRounds: StateFlow<Boolean> = _withModifiedRounds
 
     private val _game = Game()
+    fun isRoundModificationsChecked(modifications: Boolean){
+        _withModifiedRounds.value = modifications
+    }
 
-    fun addNewAutoGenerateTeam(){
+    fun addTeam(name: String){
         viewModelScope.launch {
             val temp = _teamList.value.toMutableList()
             val id = temp.size + 1
-            temp.add(Team(id))
+            temp.add(Team(id, name))
             autoGenerateRounds(temp)
             _teamList.emit(temp)
         }
@@ -43,20 +49,25 @@ class GameViewModel @Inject constructor(
 
     private fun autoGenerateRounds(teams: List<Team>){
         viewModelScope.launch {
-            val simpleRounds = Round.generateRounds(listOf(teams[0]))
             val rounds = Round.generateRounds(teams)
-            _simpleRoundList.emit(simpleRounds)
+
+            _simpleRoundList.emit(rounds.filter { it.team.id == teams[0].id }.map { it.round })
             _roundList.clear()
             _roundList.addAll(rounds)
         }
     }
 
     fun createNewGame(){
-        _roundList.forEachIndexed { index, round ->
-            round.order = index
-            _game.addRound(round)
-        }
         viewModelScope.launch {
+            _roundList.forEachIndexed { index, round ->
+                round.round.order = index
+                if (withModifiedRounds.value){
+                    val mod = repository.getRoundModification(round.round.type.value)
+                    round.round.modifierId = mod.id
+                    repository.increaseSeenCountRoundModifier(mod.id)
+                }
+                _game.addRound(round)
+            }
             repository.addNewGame(_game)
         }
     }
@@ -70,7 +81,7 @@ class GameViewModel @Inject constructor(
                 initialValue = false
             )
 
-    val round: StateFlow<Round?> =
+    val round: StateFlow<RoundWithTeamAndModifier?> =
         repository.getRoundFromGame(_game)
         .stateIn(
             scope = viewModelScope,
@@ -78,12 +89,12 @@ class GameViewModel @Inject constructor(
             initialValue = null
         )
 
-    val nextRoundTeam: StateFlow<RoundWithTeam> =
+    val nextRoundTeam: StateFlow<RoundWithTeamAndModifier> =
         repository.getNextRoundTeam(_game)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-            initialValue = RoundWithTeam(Round(), Team(0))
+            initialValue = RoundWithTeamAndModifier(Round(), Team(0))
         )
 
     fun markRoundAsCompleted(
@@ -92,12 +103,12 @@ class GameViewModel @Inject constructor(
     ){
         viewModelScope.launch {
             val round = round.value
-            round?.isRoundComplete = true
-            round?.score = score
-            round?.miss = miss
+            round?.round?.isRoundComplete = true
+            round?.round?.score = score
+            round?.round?.miss = miss
 
             if (round != null){
-                repository.markRoundAsComplete(round)
+                repository.markRoundAsComplete(round.round)
             }
 
         }
@@ -112,15 +123,15 @@ class GameViewModel @Inject constructor(
             initialValue = listOf()
         )
 
-    private fun calculateTotalResults(round: List<Round>): List<Team>{
-        val list = round.map { it.team }.distinctBy { it.id }
+    private fun calculateTotalResults(round: List<RoundWithTeamAndModifier>): List<Team>{
+        val list = round.map { it.team }.distinctBy{ it.id }
         list.forEach { team ->
             val filter = round
                 .filter { it.team.id == team.id }
             team.totalScore = filter
-                .sumOf { it.score }
+                .sumOf { it.round.score }
             team.totalMiss = filter
-                .sumOf { it.miss }
+                .sumOf { it.round.miss }
         }
         return list
     }
@@ -134,7 +145,7 @@ class GameViewModel @Inject constructor(
             initialValue = ""
         )
 
-    private fun andTheWinnerIs(round: List<Round>): String{
+    private fun andTheWinnerIs(round: List<RoundWithTeamAndModifier>): String{
         return if (round.isNotEmpty()){
             val list = calculateTotalResults(round)
             val maximumScore = list.maxBy { it.totalScore }.totalScore
@@ -156,6 +167,11 @@ class GameViewModel @Inject constructor(
 
     fun deleteGame() =
         viewModelScope.launch {
+            _teamList.emit(mutableListOf())
+            _roundList.clear()
+            _withModifiedRounds.emit(false)
+            _simpleRoundList.emit(mutableListOf())
+            _game.reset()
             repository.deleteGame(_game)
         }
 

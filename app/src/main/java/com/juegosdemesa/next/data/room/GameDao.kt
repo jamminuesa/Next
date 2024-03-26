@@ -8,7 +8,7 @@ import androidx.room.Transaction
 import androidx.room.Update
 import com.juegosdemesa.next.data.model.Card
 import com.juegosdemesa.next.data.model.Round
-import com.juegosdemesa.next.data.model.RoundWithTeam
+import com.juegosdemesa.next.data.model.RoundWithTeamAndModifier
 import com.juegosdemesa.next.data.model.Team
 import kotlinx.coroutines.flow.Flow
 
@@ -28,15 +28,17 @@ interface GameDao {
     @Query("DELETE FROM rounds WHERE gameId = :gameId")
     suspend fun deleteAll(gameId: String)
 
+    @Transaction
     @Query("SELECT * FROM rounds WHERE gameId = :gameId")
-    fun getAllRoundsFromGame(gameId: String): Flow<List<Round>>
+    fun getAllRoundsFromGame(gameId: String): Flow<List<RoundWithTeamAndModifier>>
 
+    @Transaction
     @Query("SELECT * FROM rounds WHERE gameId = :gameId AND isRoundComplete = 0 ORDER BY `order` LIMIT 1")
-    fun getNextRound(gameId: String): Flow<Round>
+    fun getNextRound(gameId: String): Flow<RoundWithTeamAndModifier>
 
     @Transaction
     @Query("SELECT * FROM rounds WHERE gameId = :gameId AND isRoundComplete = 0 ORDER BY `order` LIMIT 1 OFFSET 1")
-    fun getNextTeamRound(gameId: String): Flow<RoundWithTeam>
+    fun getNextRoundWithTeamAndModifier(gameId: String): Flow<RoundWithTeamAndModifier>
 
     @Query("SELECT count(*) FROM rounds WHERE gameId = :gameId AND isRoundComplete = 0")
     fun getIncompleteRounds(gameId: String): Flow<Int>

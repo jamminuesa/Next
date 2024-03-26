@@ -19,9 +19,9 @@ data class Team (
     var totalMiss = 0
 
     @Ignore
-    constructor(id: Int): this(
+    constructor(id: Int, name: String): this(
         id = id,
-        name = "Equipo $id",
+        name = name,
         color = Utility.generateCreamColorRand(id)
     )
 

@@ -50,6 +50,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -66,10 +67,12 @@ import com.alexstyl.swipeablecard.rememberSwipeableCardState
 import com.alexstyl.swipeablecard.swipableCard
 import com.juegosdemesa.next.R
 import com.juegosdemesa.next.data.model.Card
-import com.juegosdemesa.next.data.model.Round
+import com.juegosdemesa.next.data.model.RoundWithTeamAndModifier
 import com.juegosdemesa.next.ui.navigation.NavigationDestination
 import com.juegosdemesa.next.ui.theme.Typography
 import com.juegosdemesa.next.ui.widgets.BigCircleButton
+import com.juegosdemesa.next.ui.widgets.KeepScreenOn
+import com.juegosdemesa.next.ui.widgets.autotextsize.AutoSizeText
 import com.juegosdemesa.next.util.Utility
 import com.juegosdemesa.next.util.Utility.formatTime
 import kotlinx.coroutines.CoroutineScope
@@ -100,7 +103,7 @@ fun CardRoundScreen(
     val timeIsUp by countDownViewModel.isTimeUp.observeAsState(false)
     val round by gameViewModel.round.collectAsState()
     if (round != null){
-        cardViewModel.setCardCategory(round!!.type)
+        cardViewModel.setCardCategory(round!!.round.type)
     }
 
 
@@ -111,7 +114,6 @@ fun CardRoundScreen(
     ) {
         if (round != null){
             SetTimeIsRunningScreen(
-                timeIsUp,
                 round!!
             )
         }
@@ -132,8 +134,7 @@ fun CardRoundScreen(
 @Composable
 @OptIn(ExperimentalSwipeableCardApi::class, ExperimentalCoilApi::class)
 private fun SetTimeIsRunningScreen(
-    timeIsUp: Boolean,
-    round: Round
+    round: RoundWithTeamAndModifier
 ) {
     val time by countDownViewModel.time.observeAsState(Utility.TIME_COUNTDOWN.formatTime())
     val progress by countDownViewModel.progress.observeAsState(1.00F)
@@ -166,7 +167,7 @@ private fun SetTimeIsRunningScreen(
         Box(
             Modifier
                 .layoutId("topRef")
-                .padding(24.dp)
+                .padding(12.dp)
                 .fillMaxSize()
         ) {
             cardStates.forEach { (card, state) ->
@@ -192,7 +193,7 @@ private fun SetTimeIsRunningScreen(
                     CardView(
                         modifier = modifier,
                         text = card.text,
-                        color = round.type.color
+                        color = round.round.type.color
                     )
                 }
                 LaunchedEffect(card, state.swipedDirection) {
@@ -212,40 +213,68 @@ private fun SetTimeIsRunningScreen(
                 }
             }
         }
-        Column(Modifier
-            .layoutId("bottomRef"),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            CountDownIndicator(
-                Modifier.padding(top = 10.dp),
-                progress = progress,
-                time = time,
-                size = 100,
-                stroke = 12
-            )
-            Row(
-                Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                BigCircleButton(
-                    onClick = { onErrorButton(isPlaying) },
-                    icon = Icons.Default.Close
-                )
-                BigCircleButton(
-                    onClick = { onAcceptButton(isPlaying) },
-                    icon = Icons.Default.Check
-                )
-            }
-            AnimatedVisibility(
-                visible = !timeIsUp,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
+        ButtonsNTimer(
+            roundModifierText = round.modifier?.text ?: "",
+            progress = progress,
+            time = time,
+            isPlaying = isPlaying
+        )
+    }
+}
 
-            }
+@Composable
+private fun ButtonsNTimer(
+    roundModifierText: String,
+    progress: Float,
+    time: String,
+    isPlaying: Boolean
+){
+    Column(Modifier
+        .layoutId("bottomRef"),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        AutoSizeText(
+            modifier = Modifier
+                .height(50.dp)
+                .fillMaxWidth()
+                .padding(5.dp),
+            text = roundModifierText,
+            alignment = Alignment.Center
+        )
+
+        CountDownIndicator(
+            Modifier.padding(top = 1.dp),
+            progress = progress,
+            time = time,
+            size = 100,
+            stroke = 12
+        )
+        Row(
+            Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            BigCircleButton(
+                onClick = { onErrorButton(isPlaying) },
+                icon = Icons.Default.Close
+            )
+            BigCircleButton(
+                onClick = { onAcceptButton(isPlaying) },
+                icon = Icons.Default.Check
+            )
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ButtonSNTimerPreview(){
+    ButtonsNTimer(
+        roundModifierText = "",
+        progress = 0.5f,
+        time = "00:45",
+        isPlaying = true
+    )
 }
 
 
@@ -288,7 +317,7 @@ private fun SetTimeIsUpScreen(
                 navigateToNextRound.invoke()
             }
             ) {
-                Text(text = "Turno del ${nextTeam.team.name}")
+                Text(text = "Turno de ${nextTeam.team.name}")
             }
         }
     }

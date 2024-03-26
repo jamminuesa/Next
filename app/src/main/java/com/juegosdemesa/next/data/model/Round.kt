@@ -2,7 +2,6 @@ package com.juegosdemesa.next.data.model
 
 import androidx.room.Embedded
 import androidx.room.Entity
-import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 import java.util.UUID
@@ -13,28 +12,25 @@ data class Round(
     var id: String = "r_${UUID.randomUUID()}",
     var gameId: String = "",
     var order: Int = 0,
-    val team: Team,
+    val teamId: Int = 0,
     var score: Int = 0,
     var miss: Int = 0,
-    val type: Card.Category,
+    var modifierId: Int? = null,
+    val type: Card.Category = Card.Category.COUNTRY,
     var isRoundComplete: Boolean = false,
 ){
-    @Ignore
-    constructor(): this(
-        team = Team(id = 0),
-        type = Card.Category.COUNTRY
-    )
 
     companion object{
         fun generateRounds(
             teams: List<Team>
-        ): MutableList<Round> {
+        ): MutableList<RoundWithTeamAndModifier> {
             var roundCounter = 0
-            val mutableList = mutableListOf<Round>()
+            val mutableList = mutableListOf<RoundWithTeamAndModifier>()
             DEFAULT_GAME_ROUNDS.forEach {type ->
                 teams.forEach { team ->
-                val round = Round(order = roundCounter, team = team, type = type)
-                mutableList.add(round)
+                    val round = Round(order = roundCounter, teamId = team.id, type = type)
+                    val roundWithTeamAndModifier = RoundWithTeamAndModifier(round, team = team)
+                mutableList.add(roundWithTeamAndModifier)
                 roundCounter++
                 }
             }
@@ -50,16 +46,21 @@ data class Round(
             Card.Category.IMITATE,
             Card.Category.BRANDS,
             Card.Category.MUSIC,
-//            Card.Category.FINISH_THE_SONG,
+            Card.Category.FINISH_THE_SONG,
         )
     }
 }
 
-data class RoundWithTeam(
+data class RoundWithTeamAndModifier(
     @Embedded val round: Round,
     @Relation(
-        parentColumn = "team",
+        parentColumn = "teamId",
         entityColumn = "id"
     )
-    val team: Team
+    val team: Team,
+    @Relation(
+        parentColumn = "modifierId",
+        entityColumn = "id"
+    )
+    val modifier: RoundModifier? = null
 )
