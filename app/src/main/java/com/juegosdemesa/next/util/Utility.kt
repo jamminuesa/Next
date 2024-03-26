@@ -9,7 +9,7 @@ import kotlin.random.Random
 object Utility {
 
     //time to countdown - 1hr - 60secs
-    const val TIME_COUNTDOWN: Long = 45000L
+    const val TIME_COUNTDOWN: Long = 60000L
     private const val TIME_FORMAT = "%02d:%02d"
 
 
