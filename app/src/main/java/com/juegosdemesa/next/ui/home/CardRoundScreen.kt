@@ -18,19 +18,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
@@ -48,7 +44,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalDensity
@@ -74,6 +69,7 @@ import com.juegosdemesa.next.data.model.Card
 import com.juegosdemesa.next.data.model.Round
 import com.juegosdemesa.next.ui.navigation.NavigationDestination
 import com.juegosdemesa.next.ui.theme.Typography
+import com.juegosdemesa.next.ui.widgets.BigCircleButton
 import com.juegosdemesa.next.util.Utility
 import com.juegosdemesa.next.util.Utility.formatTime
 import kotlinx.coroutines.CoroutineScope
@@ -347,26 +343,6 @@ val constraint = ConstraintSet {
         bottom.linkTo(parent.bottom)
         height = Dimension.wrapContent
         width = Dimension.matchParent
-    }
-}
-
-@Composable
-private fun BigCircleButton(
-    onClick: () -> Unit,
-    icon:ImageVector
-){
-    FloatingActionButton(
-        onClick = onClick,
-        modifier = Modifier
-            .padding(32.dp)
-            .size(100.dp),
-        containerColor = MaterialTheme.colorScheme.primary,
-        shape = RoundedCornerShape(50.dp)
-    ){
-        Icon(imageVector = icon,
-            modifier = Modifier.size(60.dp),
-            contentDescription = "")
-
     }
 }
 
