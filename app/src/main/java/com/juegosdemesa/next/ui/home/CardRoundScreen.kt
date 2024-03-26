@@ -95,6 +95,7 @@ fun CardRoundScreen(
     navigateToEndGame: () -> Unit,
     viewModel: GameViewModel
 ) {
+    KeepScreenOn()
     gameViewModel = viewModel
     cardViewModel = hiltViewModel()
     countDownViewModel = viewModel()
