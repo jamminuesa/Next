@@ -314,7 +314,7 @@ private fun SetTimeIsUpScreen(
         } else {
             Button(onClick = {
                 gameViewModel.markRoundAsCompleted(score, miss)
-                cardViewModel.markSeenCardsAsRecentlyDisplay()
+                cardViewModel.increaseTimesSeenCards()
                 navigateToNextRound.invoke()
             }
             ) {

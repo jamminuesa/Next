@@ -15,7 +15,7 @@ data class Card(
     val difficulty: Int, // A value from 1 to 5
     val points: Int = 1,
     val tags: List<String> = listOf(),
-    val recentlyDisplayed: Boolean = false
+    val timesDisplayed: Int = 0
 ){
     @Ignore
     constructor(text: String): this (

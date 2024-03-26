@@ -64,26 +64,20 @@ class CardViewModel @Inject constructor(
         }
     }
 
-
-    val cardSeen: MutableList<Card> = mutableListOf()
+    private val cardSeen: MutableList<Card> = mutableListOf()
 
     fun addSeenCard(card: Card){
         cardSeen.add(card)
     }
 
-    fun markSeenCardsAsRecentlyDisplay() = viewModelScope.launch {
-        repository.markCardAsRecentlyDisplayed(cardSeen)
-    }
-
-    fun resetCardDisplay() = viewModelScope.launch {
-        repository.markAllCardsAsNotRecentlyDisplay()
+    fun increaseTimesSeenCards() = viewModelScope.launch {
+        repository.increaseTimesSeenCards(cardSeen)
     }
 
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
     }
 }
-
 
 
 data class CardsUiState(val itemList: List<Card> = listOf())

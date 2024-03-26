@@ -47,7 +47,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.juegosdemesa.next.NextTopAppBar
 import com.juegosdemesa.next.R
 import com.juegosdemesa.next.data.model.Round
@@ -66,16 +65,13 @@ lateinit var gViewModel: GameViewModel
 @Composable
 fun NewGameScreen(
     navigateToCardRound: () -> Unit,
-    vewModel: GameViewModel,
+    viewModel: GameViewModel,
 ){
-    val cardViewModel: CardViewModel = hiltViewModel()
-    gViewModel  = vewModel
+    gViewModel  = viewModel
     val teamList by gViewModel.teamList.collectAsState()
     val roundList by gViewModel.simpleRoundList.collectAsState()
     val checked by gViewModel.withModifiedRounds.collectAsState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-
-    cardViewModel.resetCardDisplay()
 
     Scaffold(
         modifier = Modifier
@@ -96,7 +92,7 @@ fun NewGameScreen(
             ) {
                 FloatingActionButton(
                     onClick = {
-                        vewModel.createNewGame()
+                        viewModel.createNewGame()
                         navigateToCardRound.invoke()
                     },
                     shape = MaterialTheme.shapes.medium,

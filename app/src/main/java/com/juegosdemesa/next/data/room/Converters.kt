@@ -34,4 +34,11 @@ class Converters {
                 category.value == it } ?: throw IllegalArgumentException("El valor '$it' no es un valor " +
                     "válido de la enumeración") }
     }
+
+    @TypeConverter
+    fun fromCategoryList(list: List<Card.Category>): String {
+        return if (list.isEmpty()) ""
+        else list.map { it.value }.joinToString(separator = separator )
+    }
+
 }

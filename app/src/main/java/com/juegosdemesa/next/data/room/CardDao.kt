@@ -24,14 +24,9 @@ interface CardDao {
     @Query("SELECT * from cards WHERE id = :id")
     fun getCard(id: Int): Flow<Card>
 
-    @Query("SELECT * FROM (SELECT * FROM cards WHERE category = :type AND recentlyDisplayed = 0 ORDER BY RANDOM()) " +
-            "UNION ALL " +
-            "SELECT * FROM (SELECT * FROM cards WHERE category = :type AND recentlyDisplayed = 1 ORDER BY RANDOM())")
+    @Query("SELECT * FROM cards WHERE category = :type ORDER BY timesDisplayed ASC, RANDOM()")
     fun getAllByTypeCards(type: Int): Flow<List<Card>>
 
-    @Query("UPDATE cards SET recentlyDisplayed = 1 WHERE id = :id")
-    suspend fun markAsRecentlyDisplayed(id: Int)
-
-    @Query("UPDATE cards SET recentlyDisplayed = 0")
-    suspend fun markAllAsNotRecentlyDisplay()
+    @Query("UPDATE cards SET timesDisplayed = timesDisplayed + 1 WHERE id IN (:ids)")
+    suspend fun increaseTimesSeen(ids: List<Int>)
 }

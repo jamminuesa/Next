@@ -16,11 +16,8 @@ class DatabaseRepository @Inject constructor(
     ) {
     fun getCardsByType(cardType: Card.Category) = cardDao.getAllByTypeCards(cardType.value)
 
-    suspend fun markCardAsRecentlyDisplayed(cards: List<Card>) {
-        cards.forEach { cardDao.increaseTimesSeen(it.id) }
-    }
-    suspend fun markAllCardsAsNotRecentlyDisplay()  = cardDao.markAllAsNotRecentlyDisplay()
-
+    suspend fun increaseTimesSeenCards(cards: List<Card>) =
+        cardDao.increaseTimesSeen(cards.map { it.id })
 
     fun getRoundFromGame(game: Game) =
         gameDao.getNextRound(game.id)
