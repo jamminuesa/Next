@@ -48,8 +48,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -58,7 +63,6 @@ import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberAsyncImagePainter
 import com.alexstyl.swipeablecard.Direction
 import com.alexstyl.swipeablecard.ExperimentalSwipeableCardApi
@@ -133,7 +137,7 @@ fun CardRoundScreen(
 }
 
 @Composable
-@OptIn(ExperimentalSwipeableCardApi::class, ExperimentalCoilApi::class)
+@OptIn(ExperimentalSwipeableCardApi::class)
 private fun SetTimeIsRunningScreen(
     round: RoundWithTeamAndModifier
 ) {
@@ -191,11 +195,20 @@ private fun SetTimeIsRunningScreen(
                     } else {
                         Modifier
                     }
-                    CardView(
-                        modifier = modifier,
-                        text = card.text,
-                        color = round.round.type.color
-                    )
+                        // If the cards are from finish the song use annotatedString
+                        if (round.round.type.value == 9){
+                            CardViewFinishSong(
+                                modifier = modifier,
+                                text = card.text,
+                                color = round.round.type.color
+                            )
+                        } else {
+                            CardView(
+                                modifier = modifier,
+                                text = card.text,
+                                color = round.round.type.color
+                            )
+                        }
                 }
                 LaunchedEffect(card, state.swipedDirection) {
                     if (state.swipedDirection != null) {
@@ -451,6 +464,54 @@ fun CircularProgressIndicatorBackGround(
 }
 
 @Composable
+private fun CardViewFinishSong(
+    modifier: Modifier,
+    text: String,
+    color: Color
+){
+    val annotatedString = buildAnnotatedString {
+        if (text.contains(" ... ") && text.contains(" - ")){
+            withStyle(style = SpanStyle(color = Color.Black)) {
+                append(text.substring(0, text.indexOf(" ... ") + 1) )
+            }
+            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary, fontSize = 60.sp)) {
+                append(text.substring(text.indexOf(" ... ") + 1,
+                    text.indexOf(" ... ") + 4 )
+                )
+            }
+
+            withStyle(style = SpanStyle(color = Color.Black,
+                textDecoration = TextDecoration.Underline)
+            ) {
+                append(text.substring(text.indexOf(" ... ") + 4, text.indexOf(" - ")))
+            }
+
+            withStyle(style = SpanStyle(fontSize = 20.sp)) {
+                append("\n" + text.substring(text.indexOf(" - ") + 3))
+            }
+        } else {
+            append(text)
+        }
+    }
+
+    CardView(
+        modifier = modifier,
+        text = annotatedString,
+        color = color )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CardViewSongPreview(){
+    val text = "Sufre , mamón, devuélveme a mi chica ... O te retorcerás entre polvos picapica - Hombres G"
+    CardViewFinishSong(
+        modifier =  Modifier,
+        text = text,
+        Color.White
+    )
+}
+
+@Composable
 fun CardView(
     modifier: Modifier,
     text: String,
@@ -460,11 +521,12 @@ fun CardView(
         Box (
             Modifier.background(color)
         ){
-            Text(
+            AutoSizeText(
                 text = text,
-                fontSize = 40.sp,
-                lineHeight = 50.sp,
-                textAlign = TextAlign.Center,
+                maxTextSize = 40.sp,
+//                lineHeight = 50.sp,
+//                textAlign = TextAlign.Center,
+                alignment = Alignment.Center,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -476,3 +538,29 @@ fun CardView(
         }
     }
 }
+
+@Composable
+fun CardView(
+    modifier: Modifier,
+    text: AnnotatedString,
+    color: Color
+){
+    Card (modifier){
+        Box (
+            Modifier.background(color)
+        ){
+            AutoSizeText(
+                text = text,
+                maxTextSize = 40.sp,
+                alignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+                    .padding(horizontal = 6.dp)
+                    .wrapContentHeight(Alignment.CenterVertically)
+                    .wrapContentWidth(Alignment.CenterHorizontally)
+            )
+        }
+    }
+}
+
