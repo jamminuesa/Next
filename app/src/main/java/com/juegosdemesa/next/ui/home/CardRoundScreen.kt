@@ -180,13 +180,13 @@ private fun SetTimeIsRunningScreen(
 
         //Display the information dialog button only if the round hasn't started
         AnimatedVisibility(
+            modifier = Modifier
+                .layoutId("topRightCornerRef"),
             visible = !isPlaying,
             enter = fadeIn(),
             exit = fadeOut()
         ) {
             IconButton(
-                modifier = Modifier
-                    .layoutId("topRightCornerRef"),
                 onClick = { openInformationDialog.value = true }
             ) {
                 Image(
