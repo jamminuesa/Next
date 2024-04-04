@@ -15,11 +15,11 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface GameDao {
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTeam(team: Team)
     @Insert
     suspend fun insert(round: Round)
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(list: List<Card>)
 
     @Update

@@ -171,8 +171,8 @@ class GameViewModel @Inject constructor(
             _roundList.clear()
             _withModifiedRounds.emit(false)
             _simpleRoundList.emit(mutableListOf())
-            _game.reset()
             repository.deleteGame(_game)
+            _game.reset()
         }
 
 
