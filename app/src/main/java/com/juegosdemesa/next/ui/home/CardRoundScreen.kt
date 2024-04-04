@@ -8,6 +8,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,6 +28,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
@@ -35,6 +37,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,6 +52,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -75,6 +80,7 @@ import com.juegosdemesa.next.data.model.RoundWithTeamAndModifier
 import com.juegosdemesa.next.ui.navigation.NavigationDestination
 import com.juegosdemesa.next.ui.theme.Typography
 import com.juegosdemesa.next.ui.widgets.BigCircleButton
+import com.juegosdemesa.next.ui.widgets.InformationDialog
 import com.juegosdemesa.next.ui.widgets.KeepScreenOn
 import com.juegosdemesa.next.ui.widgets.autotextsize.AutoSizeText
 import com.juegosdemesa.next.util.Utility
@@ -145,6 +151,7 @@ private fun SetTimeIsRunningScreen(
     val progress by countDownViewModel.progress.observeAsState(1.00F)
     val isPlaying by countDownViewModel.isPlaying.observeAsState(false)
     val cardUiState by cardViewModel.cardUiState.collectAsState()
+    val openInformationDialog = remember { mutableStateOf(false)  }
 
     cardStates = cardUiState.itemList
         .toMutableList()
@@ -161,6 +168,7 @@ private fun SetTimeIsRunningScreen(
                 contentScale = ContentScale.Crop
             ),
     ) {
+
         Text(
             modifier = Modifier
                 .layoutId("headerRef")
@@ -169,6 +177,26 @@ private fun SetTimeIsRunningScreen(
             style = Typography.titleLarge,
             text = round.team.name,
         )
+
+        //Display the information dialog button only if the round hasn't started
+        AnimatedVisibility(
+            visible = !isPlaying,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            IconButton(
+                modifier = Modifier
+                    .layoutId("topRightCornerRef"),
+                onClick = { openInformationDialog.value = true }
+            ) {
+                Image(
+                    painterResource(R.drawable.help_24),
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
+                    contentDescription = null
+                )
+            }
+        }
+
         Box(
             Modifier
                 .layoutId("topRef")
@@ -233,6 +261,14 @@ private fun SetTimeIsRunningScreen(
             time = time,
             isPlaying = isPlaying
         )
+
+        if (openInformationDialog.value){
+            InformationDialog(
+                onDismissRequest = { openInformationDialog.value = false },
+                title = round.round.type.text,
+                text = round.round.type.helpInfo
+            )
+        }
     }
 }
 
@@ -366,12 +402,20 @@ private fun onErrorButton(isPlaying: Boolean){
 
 val constraint = ConstraintSet {
     val headerRef = createRefFor("headerRef")
+    val topRightCornerRef = createRefFor("topRightCornerRef")
     val topRef = createRefFor("topRef")
     val bottomRef = createRefFor("bottomRef")
 
     constrain(headerRef) {
         top.linkTo(parent.top)
         width = Dimension.matchParent
+        height = Dimension.wrapContent
+    }
+
+    constrain(topRightCornerRef){
+        top.linkTo(parent.top)
+        end.linkTo(parent.end)
+        width = Dimension.wrapContent
         height = Dimension.wrapContent
     }
 
