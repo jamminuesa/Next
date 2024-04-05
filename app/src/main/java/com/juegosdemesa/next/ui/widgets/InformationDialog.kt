@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.juegosdemesa.next.data.model.Card
 
@@ -28,7 +29,10 @@ fun InformationDialog(
             Text(text = title)
         },
         text = {
-            Text(text = text)
+            Text(
+                text = text,
+                textAlign = TextAlign.Justify
+            )
         },
         onDismissRequest = {
             onDismissRequest()
