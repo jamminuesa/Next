@@ -46,7 +46,7 @@ data class Card(
         ACTIONS(6, "Acciones", Utility.hexColorToColor("#84b6f4"), "Mímica: Acciones",
             "Mediante mímica representa las siguientes acciones del día a día. Puedes hacer onomatopeyas pero no puedes usar objetos"),
         IMITATE(7, "Imitar", Utility.hexColorToColor("#fdfd96"), "Sonido: Imita a personajes",
-            "Imita mediante sonidos a las siguientes personas/animales. Si es una persona imita su forma de hablar, no vale hacer gestos, mímica ni describir quien eres. Los animales saben hablar"),
+            "Imita mediante sonidos a las siguientes personas/animales. Si es una persona imita su forma de hablar, no vale hacer gestos, mímica ni describir quien eres. Obviamente, los animales no saben hablar"),
         HUM(8, "Tararear", Utility.hexColorToColor("#fdfd96"), "Sonido: Tararea las canciones",
             "Tararea las canciones, en serio tenías que mirar esto, yo pensaba que aquí había nivel. No vale cantar la letra solo tararear"),
         FINISH_THE_SONG(9, "Termina la canción", Utility.hexColorToColor("#fdfd96"), "Termina la canción",
