@@ -14,6 +14,12 @@ Las categorías del juego son:
 
 La idea inicial surgió con el reto de hacer una aplicación enteramente con Compose.
 
+<div style="display: flex;">
+ <img src="https://github.com/jamminuesa/Next/blob/master/screenshots/Screenshot_20240404_224640.png?raw=true" alt="Imagen 1" style="width: 33%;">
+ <img src="https://github.com/jamminuesa/Next/blob/master/screenshots/Screenshot_20240404_224938.png?raw=true" alt="Imagen 1" style="width: 33%;">
+</div>
+
+
 ## Futuros cambios
 Según el interés se pueden customizar las rondas o taggear las tarjetas para seleccionar solo de algún tipo: Década 60,70,80 América, Cine, Televisión, etc.
 
