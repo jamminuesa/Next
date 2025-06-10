@@ -1,0 +1,78 @@
+[versions]
+#Plugins
+androidApplication = "8.9.3"
+#kotlinAndroid = "1.9.10"
+kotlinAndroid = "2.0.21"
+#ksp = "1.9.10-1.0.13"
+ksp = "2.0.21-1.0.27"
+
+androidx-activity = "1.10.1"
+androidx-core = "1.16.0"
+androidx-lifecycle = "2.9.1"
+androidx-test-ext-junit = "1.2.1"
+androidx-test-espresso = "3.6.1"
+junit = "4.13.2"
+navigation = "2.9.0" # Version for Fragment KTX and Compose Navigation
+#Compose
+compose = "2025.06.00"
+constraintlayout-compose = "1.1.1" #Need its own version respect to compose BoM
+runtime-compose-livedata = "1.8.2"
+coil-compose = "2.1.0"
+
+swipeablecard = "0.1.0"
+room = "2.6.1"
+hilt = "2.47"
+hilt-compose-navigation = "1.2.0"
+
+
+[libraries]
+# AndroidX and Lifecycle
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "androidx-core" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidx-activity" }
+
+# Compose
+compose-bom = {group = "androidx.compose", name="compose-bom", version.ref = "compose"}
+# Compose dependencies (using BoM, so no version.ref here)
+androidx-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
+compose-material3 = {group = "androidx.compose.material3", name="material3"}
+androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+compose-constrainlayout = {group = "androidx.constraintlayout", name="constraintlayout-compose", version.ref ="constraintlayout-compose"}
+
+
+# Testing libraries
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
+androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "androidx-test-espresso" }
+androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" } # Uses Compose BoM
+androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" } # Uses Compose BoM
+androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" } # Uses Compose BoM
+
+# Navigation
+androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+
+# Lifecycle extensions for Compose
+androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
+androidx-compose-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtime-compose-livedata" }
+
+# Other Libraries
+swipeablecard = { group = "com.alexstyl.swipeablecard", name = "swipeablecard", version.ref = "swipeablecard" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil-compose" }
+
+#Room
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+
+# Hilt
+hilt = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
+hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
+androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hilt-compose-navigation" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "androidApplication" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinAndroid" }
+google-devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+google-dagger-hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlinAndroid" }

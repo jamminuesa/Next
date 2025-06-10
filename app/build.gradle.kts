@@ -1,20 +1,20 @@
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    //For Room substitute for kapt
-    id("com.google.devtools.ksp")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.google.devtools.ksp)
     //For Hilt
-    id("dagger.hilt.android.plugin")
+    alias(libs.plugins.google.dagger.hilt.android)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
     namespace = "com.juegosdemesa.next"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.juegosdemesa.next"
         minSdk = 28
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -34,19 +34,17 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
     buildFeatures {
         compose = true
         viewBinding = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.3"
-    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -55,51 +53,49 @@ android {
 }
 
 dependencies {
+    // AndroidX and Lifecycle
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
 
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
-    implementation("androidx.activity:activity-compose:1.8.2")
-    implementation(platform("androidx.compose:compose-bom:2023.08.00"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    // Compose BoM
+    implementation(platform(libs.compose.bom))
+    androidTestImplementation(platform(libs.compose.bom))
+    //Compose dependencies (versions managed by BoM)
+    implementation(libs.compose.material3)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.compose.constrainlayout)
 
-    //Library for tinder like card
+    // Testing libraries
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.espresso.core)
+    androidTestImplementation(libs.androidx.ui.test.junit4) // Uses Compose BoM
+    debugImplementation(libs.androidx.ui.tooling) // Uses Compose BoM
+    debugImplementation(libs.androidx.ui.test.manifest) // Uses Compose BoM
 
-    implementation ("com.github.AsynctaskCoffee:tinderlikecardstack:1.0")
-    implementation ("com.google.android.material:material:1.11.0")
-    implementation ("io.coil-kt:coil-compose:2.1.0")
 
-    val navigationVersion = "2.7.6"
-    implementation ("androidx.navigation:navigation-fragment-ktx:$navigationVersion")
+    // Navigation
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.compose)
 
-    implementation ("com.alexstyl.swipeablecard:swipeablecard:0.1.0")
-    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.26.1-alpha")
+    // Lifecycle extensions for Compose
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.compose.runtime.livedata)
 
-    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
-    implementation ("androidx.compose.runtime:runtime-livedata:1.5.4")
-    implementation ("androidx.navigation:navigation-compose:2.7.6")
-
-    val roomVersion = "2.6.1"
     //Room
-    implementation("androidx.room:room-runtime:$roomVersion")
-    ksp("androidx.room:room-compiler:$roomVersion")
-    implementation("androidx.room:room-ktx:$roomVersion")
+    implementation (libs.androidx.room.runtime)
+    ksp (libs.androidx.room.compiler)
+    // optional - Kotlin Extensions and Coroutines support for Room
+    implementation (libs.androidx.room.ktx)
 
     //Hilt
-    val hiltVersion = 2.47
-    implementation ("com.google.dagger:hilt-android:$hiltVersion")
-    ksp ("com.google.dagger:hilt-android-compiler:$hiltVersion")
-    implementation ("androidx.hilt:hilt-navigation-compose:1.0.0")
+    implementation (libs.hilt)
+    ksp (libs.hilt.android.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 
-    //ConstrainLayout
-    implementation ("androidx.constraintlayout:constraintlayout-compose:1.0.1")
+    // Other Libraries
+    implementation(libs.swipeablecard)
+    implementation (libs.coil.compose)
 }

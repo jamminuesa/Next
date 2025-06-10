@@ -3,6 +3,7 @@ package com.juegosdemesa.next.ui.home
 
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
@@ -22,9 +23,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -40,6 +44,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
@@ -51,7 +56,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -82,7 +86,6 @@ import com.juegosdemesa.next.ui.theme.Typography
 import com.juegosdemesa.next.ui.widgets.BigCircleButton
 import com.juegosdemesa.next.ui.widgets.InformationDialog
 import com.juegosdemesa.next.ui.widgets.KeepScreenOn
-import com.juegosdemesa.next.ui.widgets.autotextsize.AutoSizeText
 import com.juegosdemesa.next.util.Utility
 import com.juegosdemesa.next.util.Utility.formatTime
 import kotlinx.coroutines.CoroutineScope
@@ -101,10 +104,20 @@ private lateinit var scope: CoroutineScope
 
 @Composable
 fun CardRoundScreen(
+    navigateToHome: () -> Unit,
     navigateToNextRound: () -> Unit,
     navigateToEndGame: () -> Unit,
     viewModel: GameViewModel
 ) {
+    var showExitDialog by remember { mutableStateOf(false) }
+
+    // Intercept back press event
+    // 'enabled' controls if handler is active.
+    // If enabled is false, back press will behave as default
+    BackHandler (enabled = true) {
+        showExitDialog = true
+    }
+
     KeepScreenOn()
     gameViewModel = viewModel
     cardViewModel = hiltViewModel()
@@ -138,6 +151,28 @@ fun CardRoundScreen(
         SetTimeIsUpScreen(
             navigateToNextRound,
             navigateToEndGame
+        )
+    }
+
+    // Diálogo que se muestra al pulsar atrás
+    if (showExitDialog) {
+        AlertDialog(
+            onDismissRequest = { showExitDialog = false }, // Permitir cerrar el diálogo pulsando fuera o atrás
+            title = { Text("¿Salir de la partida?") },
+            text = { Text("¿Estás seguro de que quieres salir? La partida actual se eliminará") },
+            confirmButton = {
+                Button(onClick = {
+                    gameViewModel.deleteGame()
+                    navigateToHome.invoke()
+                }) {
+                    Text("Sí, salir")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showExitDialog = false }) {
+                    Text("No, cancelar")
+                }
+            }
         )
     }
 }
@@ -283,13 +318,17 @@ private fun ButtonsNTimer(
         .layoutId("bottomRef"),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        AutoSizeText(
+        BasicText(
             modifier = Modifier
                 .height(50.dp)
                 .fillMaxWidth()
                 .padding(5.dp),
             text = roundModifierText,
-            alignment = Alignment.Center
+            autoSize = TextAutoSize.StepBased(),
+            style = MaterialTheme.typography.bodyMedium.copy(
+                textAlign = TextAlign.Center // Apply text alignment
+            ),
+
         )
 
         CountDownIndicator(
@@ -455,12 +494,12 @@ fun CountDownIndicator(
                 modifier = Modifier
                     .height(size.dp)
                     .width(size.dp),
-                color = colorResource(R.color.black),
+                color = MaterialTheme.colorScheme.primaryContainer,
                 stroke
             )
 
             CircularProgressIndicator(
-                progress = animatedProgress,
+                progress = { animatedProgress },
                 modifier = Modifier
                     .height(size.dp)
                     .width(size.dp),
@@ -565,13 +604,15 @@ fun CardView(
         Box (
             Modifier.background(color)
         ){
-            AutoSizeText(
+            BasicText(
                 text = text,
-                maxTextSize = 40.sp,
-//                lineHeight = 50.sp,
-//                textAlign = TextAlign.Center,
-                alignment = Alignment.Center,
-                style = MaterialTheme.typography.bodyMedium,
+                autoSize = TextAutoSize.StepBased(
+                    maxFontSize = 40.sp
+                ),
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    textAlign = TextAlign.Center, // Apply text alignment
+                    lineHeight = 50.sp,
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight()
@@ -593,10 +634,15 @@ fun CardView(
         Box (
             Modifier.background(color)
         ){
-            AutoSizeText(
+            BasicText(
                 text = text,
-                maxTextSize = 40.sp,
-                alignment = Alignment.Center,
+                autoSize = TextAutoSize.StepBased(
+                    maxFontSize = 40.sp
+                ),
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    lineHeight = 50.sp,
+                    textAlign = TextAlign.Center // Apply text alignment
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight()
