@@ -46,6 +46,7 @@ fun NextNavHost(
 
         composable(route = CardRoundDestination.route){
             CardRoundScreen(
+                navigateToHome = {navController.navigate(HomeDestination.route)},
                 navigateToNextRound = {navController.navigate(CardRoundDestination.route)},
                 navigateToEndGame = {navController.navigate(EndGameDestination.route)},
                 gameViewModel
