@@ -28,8 +28,8 @@ object DatabaseModule {
         @ApplicationContext appContext: Context
     ): GameDatabase {
         return Room.databaseBuilder(appContext, GameDatabase::class.java,
-                GameDatabase.DATABASE_NAME)
-                .fallbackToDestructiveMigration()
+            GameDatabase.DATABASE_NAME)
+            .fallbackToDestructiveMigration(true)
                 .createFromAsset("next.db")
                 .build()
     }

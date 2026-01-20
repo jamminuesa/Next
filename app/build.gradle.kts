@@ -9,12 +9,12 @@ plugins {
 
 android {
     namespace = "com.juegosdemesa.next"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.juegosdemesa.next"
         minSdk = 28
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -37,8 +37,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        }
     }
     buildFeatures {
         compose = true
@@ -62,9 +64,7 @@ dependencies {
     implementation(platform(libs.compose.bom))
     androidTestImplementation(platform(libs.compose.bom))
     //Compose dependencies (versions managed by BoM)
-    implementation(libs.compose.material3)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.bundles.compose)
     implementation(libs.compose.constrainlayout)
 
     // Testing libraries
@@ -85,10 +85,8 @@ dependencies {
     implementation(libs.androidx.compose.runtime.livedata)
 
     //Room
-    implementation (libs.androidx.room.runtime)
+    implementation(libs.bundles.room)
     ksp (libs.androidx.room.compiler)
-    // optional - Kotlin Extensions and Coroutines support for Room
-    implementation (libs.androidx.room.ktx)
 
     //Hilt
     implementation (libs.hilt)
