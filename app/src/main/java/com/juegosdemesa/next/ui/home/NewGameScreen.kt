@@ -34,6 +34,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -73,6 +74,14 @@ fun NewGameScreen(
     val checked by gViewModel.withModifiedRounds.collectAsState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
+    LaunchedEffect (Unit) {
+        gViewModel.gameCreatedEvent.collect { success ->
+            if (success) {
+                navigateToCardRound()
+            }
+        }
+    }
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -93,7 +102,6 @@ fun NewGameScreen(
                 FloatingActionButton(
                     onClick = {
                         viewModel.createNewGame()
-                        navigateToCardRound.invoke()
                     },
                     shape = MaterialTheme.shapes.medium,
                     modifier = Modifier.padding(12.dp)

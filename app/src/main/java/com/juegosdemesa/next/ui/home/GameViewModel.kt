@@ -8,9 +8,11 @@ import com.juegosdemesa.next.data.model.Round
 import com.juegosdemesa.next.data.model.RoundWithTeamAndModifier
 import com.juegosdemesa.next.data.model.Team
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -57,6 +59,9 @@ class GameViewModel @Inject constructor(
         }
     }
 
+    private val _gameCreatedEvent = MutableSharedFlow<Boolean>()
+    val gameCreatedEvent = _gameCreatedEvent.asSharedFlow()
+
     fun createNewGame(){
         viewModelScope.launch {
             _roundList.forEachIndexed { index, round ->
@@ -69,6 +74,8 @@ class GameViewModel @Inject constructor(
                 _game.addRound(round)
             }
             repository.addNewGame(_game)
+
+            _gameCreatedEvent.emit(true)
         }
     }
 
