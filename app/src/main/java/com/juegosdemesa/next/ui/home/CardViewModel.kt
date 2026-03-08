@@ -4,14 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.juegosdemesa.next.data.DatabaseRepository
 import com.juegosdemesa.next.data.model.Card
+import com.juegosdemesa.next.util.info
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -19,27 +15,17 @@ import javax.inject.Inject
 class CardViewModel @Inject constructor(
     private val repository: DatabaseRepository
 ): ViewModel() {
-    private val cardCategory = MutableStateFlow(Card.Category.DEFAULT)
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val cardUiState: StateFlow<CardsUiState> = cardCategory
-        .flatMapLatest { type ->
-            repository.getCardsByType(type)
-                .map {// Add a cover
-                    val modifiedList = it.toMutableList()
-                    modifiedList.add(0, Card(type.description))
-                    CardsUiState(modifiedList)
-                }
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-            initialValue = CardsUiState()
-        )
+    private val _cardListState = MutableStateFlow<List<Card>>(listOf())
+    val cardListState: StateFlow<List<Card>> = _cardListState
 
-    fun setCardCategory(category: Card.Category){
+    fun loadCardsCategory(category: Card.Category) {
         viewModelScope.launch {
-            cardCategory.emit(category)
+            val cards = repository.getCardsByType(category)
+            val modifiedList = cards.toMutableList()
+            modifiedList.add(0, Card(category.description))
+
+            _cardListState.value = modifiedList
         }
     }
 
@@ -64,20 +50,11 @@ class CardViewModel @Inject constructor(
         }
     }
 
-    private val cardSeen: MutableList<Card> = mutableListOf()
-
     fun addSeenCard(card: Card){
-        cardSeen.add(card)
-    }
-
-    fun increaseTimesSeenCards() = viewModelScope.launch {
-        repository.increaseTimesSeenCards(cardSeen)
-    }
-
-    companion object {
-        private const val TIMEOUT_MILLIS = 5_000L
+        //cardsSeen.add(card)
+        viewModelScope.launch {
+            info("Card ${card.text} has been seen, add +1 view")
+            repository.increaseTimesSeenCard(card)
+        }
     }
 }
-
-
-data class CardsUiState(val itemList: List<Card> = listOf())

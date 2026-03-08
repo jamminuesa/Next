@@ -154,7 +154,7 @@ fun NewGameBodyPreview(){
     }
 
     val list1 = mutableListOf<Round>()
-    for (i in 1..4){
+    repeat(4){
         list1.add(Round())
     }
     NewGameBody(
@@ -465,7 +465,7 @@ private fun RoundItem(
 fun RoundHeaderPreview(){
     NextTheme {
         val list = mutableListOf<Round>()
-        for (i in 1..4){
+        repeat (4){
             list.add(Round())
         }
         RoundHeader( roundList = list)
@@ -476,7 +476,7 @@ fun RoundHeaderPreview(){
 @Composable
 fun RoundListPreview(){
     val list = mutableListOf<Round>()
-    for (i in 1..4){
+    repeat (4){
         list.add(Round())
     }
     RoundList(list)

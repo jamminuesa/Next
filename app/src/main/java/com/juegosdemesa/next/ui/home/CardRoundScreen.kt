@@ -126,8 +126,11 @@ fun CardRoundScreen(
 
     val timeIsUp by countDownViewModel.isTimeUp.observeAsState(false)
     val round by gameViewModel.round.collectAsState()
-    if (round != null){
-        cardViewModel.setCardCategory(round!!.round.type)
+
+    LaunchedEffect(round){
+        if (round != null){
+            cardViewModel.loadCardsCategory(round!!.round.type)
+        }
     }
 
 
@@ -185,11 +188,10 @@ private fun SetTimeIsRunningScreen(
     val time by countDownViewModel.time.observeAsState(Utility.TIME_COUNTDOWN.formatTime())
     val progress by countDownViewModel.progress.observeAsState(1.00F)
     val isPlaying by countDownViewModel.isPlaying.observeAsState(false)
-    val cardUiState by cardViewModel.cardUiState.collectAsState()
+    val cardUiState by cardViewModel.cardListState.collectAsState()
     val openInformationDialog = remember { mutableStateOf(false)  }
 
-    cardStates = cardUiState.itemList
-        .toMutableList()
+    cardStates = cardUiState
         .reversed()
         .map { it to rememberSwipeableCardState() }
 
@@ -210,7 +212,7 @@ private fun SetTimeIsRunningScreen(
                 .padding(8.dp),
             textAlign = TextAlign.Center,
             style = Typography.titleLarge,
-            text = round.team.name,
+            text = "Turno de: ${round.team.name}",
         )
 
         //Display the information dialog button only if the round hasn't started
@@ -238,7 +240,7 @@ private fun SetTimeIsRunningScreen(
                 .padding(12.dp)
                 .fillMaxSize()
         ) {
-            cardStates.forEach { (card, state) ->
+            cardStates.forEachIndexed { index, (card, state) ->
                 if (state.swipedDirection == null) {
                     // En caso de que no se de al botón, no se puede quitar la primera tarjeta
                     val modifier = if (isPlaying) {
@@ -275,7 +277,7 @@ private fun SetTimeIsRunningScreen(
                 }
                 LaunchedEffect(card, state.swipedDirection) {
                     if (state.swipedDirection != null) {
-                            cardViewModel.addSeenCard(card)
+                            cardViewModel.addSeenCard(cardStates[index - 1].first) // List is reversed
                         if (state.swipedDirection == Direction.Right) {
                             cardViewModel.addPointsToScore(card.points)
                         } else if (state.swipedDirection == Direction.Left) {
@@ -283,7 +285,7 @@ private fun SetTimeIsRunningScreen(
                         }
 
                         //Check if there are more cards
-                        if (cardUiState.itemList.last().id == card.id) {
+                        if (cardUiState.last().id == card.id) {
                             countDownViewModel.noMoreCards()
                         }
                     }
@@ -402,8 +404,7 @@ private fun SetTimeIsUpScreen(
         } else {
             Button(onClick = {
                 gameViewModel.markRoundAsCompleted(score, miss)
-                cardViewModel.increaseTimesSeenCards()
-                navigateToNextRound.invoke()
+                navigateToNextRound()
             }
             ) {
                 Text(text = "Turno de ${nextTeam.team.name}")

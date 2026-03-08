@@ -14,10 +14,15 @@ class DatabaseRepository @Inject constructor(
     private val roundModifierDao: RoundModifierDao,
     private val gameDao: GameDao
     ) {
-    fun getCardsByType(cardType: Card.Category) = cardDao.getAllByTypeCards(cardType.value)
 
-    suspend fun increaseTimesSeenCards(cards: List<Card>) =
-        cardDao.increaseTimesSeen(cards.map { it.id })
+    suspend fun getCardsByType(cardType: Card.Category) =
+        cardDao.getAllByTypeCards(cardType.value)
+
+    suspend fun increaseTimesSeenCard(card : Card) {
+        if (card.id != 0){
+            cardDao.increaseTimesSeen(card.id)
+        }
+    }
 
     fun getRoundFromGame(game: Game) =
         gameDao.getNextRound(game.id)

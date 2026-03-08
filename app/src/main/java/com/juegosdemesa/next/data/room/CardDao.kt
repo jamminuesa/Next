@@ -25,8 +25,8 @@ interface CardDao {
     fun getCard(id: Int): Flow<Card>
 
     @Query("SELECT * FROM cards WHERE category = :type ORDER BY timesDisplayed ASC, RANDOM()")
-    fun getAllByTypeCards(type: Int): Flow<List<Card>>
+    suspend fun getAllByTypeCards(type: Int): List<Card>
 
-    @Query("UPDATE cards SET timesDisplayed = timesDisplayed + 1 WHERE id IN (:ids)")
-    suspend fun increaseTimesSeen(ids: List<Int>)
+    @Query("UPDATE cards SET timesDisplayed = timesDisplayed + 1 WHERE id = :id")
+    suspend fun increaseTimesSeen(id: Int)
 }
