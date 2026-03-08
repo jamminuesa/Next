@@ -75,11 +75,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.alexstyl.swipeablecard.Direction
 import com.alexstyl.swipeablecard.ExperimentalSwipeableCardApi
-import com.alexstyl.swipeablecard.SwipeableCardState
 import com.alexstyl.swipeablecard.rememberSwipeableCardState
 import com.alexstyl.swipeablecard.swipableCard
 import com.juegosdemesa.next.R
-import com.juegosdemesa.next.data.model.Card
 import com.juegosdemesa.next.data.model.RoundWithTeamAndModifier
 import com.juegosdemesa.next.ui.navigation.NavigationDestination
 import com.juegosdemesa.next.ui.theme.Typography
@@ -88,19 +86,12 @@ import com.juegosdemesa.next.ui.widgets.InformationDialog
 import com.juegosdemesa.next.ui.widgets.KeepScreenOn
 import com.juegosdemesa.next.util.Utility
 import com.juegosdemesa.next.util.Utility.formatTime
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 object CardRoundDestination: NavigationDestination {
     override val route = "cardsDisplay"
     override val titleRes = R.string.app_name
 }
-
-private lateinit var countDownViewModel: CountDownViewModel
-private lateinit var cardStates: List<Pair<Card, SwipeableCardState>>
-private lateinit var cardViewModel: CardViewModel
-private lateinit var gameViewModel: GameViewModel
-private lateinit var scope: CoroutineScope
 
 @Composable
 fun CardRoundScreen(
@@ -119,10 +110,10 @@ fun CardRoundScreen(
     }
 
     KeepScreenOn()
-    gameViewModel = viewModel
-    cardViewModel = hiltViewModel()
-    countDownViewModel = viewModel()
-    scope = rememberCoroutineScope()
+
+    val gameViewModel: GameViewModel = viewModel
+    val cardViewModel: CardViewModel = hiltViewModel()
+    val countDownViewModel: CountDownViewModel = viewModel()
 
     val timeIsUp by countDownViewModel.isTimeUp.observeAsState(false)
     val round by gameViewModel.round.collectAsState()
@@ -141,7 +132,9 @@ fun CardRoundScreen(
     ) {
         if (round != null){
             SetTimeIsRunningScreen(
-                round!!
+                round!!,
+                countDownViewModel,
+                cardViewModel
             )
         }
 
@@ -153,7 +146,9 @@ fun CardRoundScreen(
         exit = fadeOut()) {
         SetTimeIsUpScreen(
             navigateToNextRound,
-            navigateToEndGame
+            navigateToEndGame,
+            cardViewModel,
+            gameViewModel
         )
     }
 
@@ -183,15 +178,18 @@ fun CardRoundScreen(
 @Composable
 @OptIn(ExperimentalSwipeableCardApi::class)
 private fun SetTimeIsRunningScreen(
-    round: RoundWithTeamAndModifier
+    round: RoundWithTeamAndModifier,
+    countDownViewModel: CountDownViewModel,
+    cardViewModel: CardViewModel
 ) {
+    val scope = rememberCoroutineScope()
     val time by countDownViewModel.time.observeAsState(Utility.TIME_COUNTDOWN.formatTime())
     val progress by countDownViewModel.progress.observeAsState(1.00F)
     val isPlaying by countDownViewModel.isPlaying.observeAsState(false)
     val cardUiState by cardViewModel.cardListState.collectAsState()
     val openInformationDialog = remember { mutableStateOf(false)  }
 
-    cardStates = cardUiState
+    val cardStates = cardUiState
         .reversed()
         .map { it to rememberSwipeableCardState() }
 
@@ -296,7 +294,28 @@ private fun SetTimeIsRunningScreen(
             roundModifierText = round.modifier?.text ?: "",
             progress = progress,
             time = time,
-            isPlaying = isPlaying
+            isPlaying = isPlaying,
+            startTimer = {countDownViewModel.startTimer()},
+            swipeLeft = {
+                scope.launch {
+                    val last = cardStates.reversed()
+                        .firstOrNull {
+                            it.second.offset.value == Offset(0f, 0f)
+                        }?.second
+
+                    last?.swipe(Direction.Left)
+                }
+            },
+            swipeRight = {
+                scope.launch {
+                    val last = cardStates.reversed()
+                        .firstOrNull {
+                            it.second.offset.value == Offset(0f, 0f)
+                        }?.second
+
+                    last?.swipe(Direction.Right)
+                }
+            }
         )
 
         if (openInformationDialog.value){
@@ -314,7 +333,10 @@ private fun ButtonsNTimer(
     roundModifierText: String,
     progress: Float,
     time: String,
-    isPlaying: Boolean
+    isPlaying: Boolean,
+    startTimer: () -> Unit,
+    swipeRight:() -> Unit,
+    swipeLeft:() -> Unit
 ){
     Column(Modifier
         .layoutId("bottomRef"),
@@ -346,11 +368,20 @@ private fun ButtonsNTimer(
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             BigCircleButton(
-                onClick = { onErrorButton(isPlaying) },
+                onClick = {
+                    if (isPlaying){
+                        swipeLeft()
+                    }
+                          },
                 icon = Icons.Default.Close
             )
             BigCircleButton(
-                onClick = { onAcceptButton(isPlaying) },
+                onClick = {
+                    if (!isPlaying){
+                        startTimer()
+                    }
+                    swipeRight()
+                },
                 icon = Icons.Default.Check
             )
         }
@@ -364,7 +395,10 @@ fun ButtonSNTimerPreview(){
         roundModifierText = "",
         progress = 0.5f,
         time = "00:45",
-        isPlaying = true
+        isPlaying = true,
+        startTimer = {},
+        swipeRight = {},
+        swipeLeft = {}
     )
 }
 
@@ -373,7 +407,9 @@ fun ButtonSNTimerPreview(){
 @Composable
 private fun SetTimeIsUpScreen(
     navigateToNextRound: () -> Unit,
-    navigateToEndGame: () -> Unit
+    navigateToEndGame: () -> Unit,
+    cardViewModel: CardViewModel,
+    gameViewModel: GameViewModel
 ){
     val score by cardViewModel.score.collectAsState()
     val miss by cardViewModel.miss.collectAsState()
@@ -409,33 +445,6 @@ private fun SetTimeIsUpScreen(
             ) {
                 Text(text = "Turno de ${nextTeam.team.name}")
             }
-        }
-    }
-}
-
-
-private fun onAcceptButton(isPlaying: Boolean){
-    if (!isPlaying){
-        countDownViewModel.startTimer()
-    }
-    scope.launch {
-        val last = cardStates.reversed()
-            .firstOrNull {
-                it.second.offset.value == Offset(0f, 0f)
-            }?.second
-
-        last?.swipe(Direction.Right)
-    }
-}
-
-private fun onErrorButton(isPlaying: Boolean){
-    if (isPlaying){
-        scope.launch {
-            val last = cardStates.reversed()
-                .firstOrNull {
-                    it.second.offset.value == Offset(0f, 0f)
-                }?.second
-            last?.swipe(Direction.Left)
         }
     }
 }
