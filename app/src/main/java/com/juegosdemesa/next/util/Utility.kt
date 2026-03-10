@@ -1,7 +1,10 @@
 package com.juegosdemesa.next.util
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.core.graphics.toColorInt
+import com.juegosdemesa.next.data.model.Card
+import com.juegosdemesa.next.ui.home.GameTheme
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
@@ -23,7 +26,7 @@ object Utility {
     fun hexColorToColor(hexColor: String): Color {
         return try {
             Color(hexColor.toColorInt())
-        } catch (e: NumberFormatException) {
+        } catch (_: NumberFormatException) {
             // Manejo de la excepción en caso de que la cadena no sea un color hexadecimal válido
             // Puedes imprimir un mensaje de error, lanzar una excepción personalizada, o manejarlo de otra manera según tus necesidades.
             Color.Blue  // Valor predeterminado en caso de error
@@ -39,6 +42,22 @@ object Utility {
 
         // Convierte el valor entero ARGB a su representación hexadecimal como una cadena
         return String.format("#%08X", argb)
+    }
+
+    @Composable
+    fun getCardColor(category: Card.Category): Color {
+        return when (category){
+            Card.Category.DEFAULT -> Color.White
+            Card.Category.COUNTRY,
+            Card.Category.PEOPLE,
+            Card.Category.BRANDS-> GameTheme.colors.descriptionRound
+            Card.Category.SPORTS,
+            Card.Category.MUSIC,
+            Card.Category.ACTIONS -> GameTheme.colors.mimicRound
+            Card.Category.IMITATE,
+            Card.Category.HUM,
+            Card.Category.FINISH_THE_SONG -> GameTheme.colors.hummingRound
+        }
     }
 
     fun generateCreamColorRand(seed: Int): String {

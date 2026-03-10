@@ -434,20 +434,20 @@ private fun RoundItem(
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(
-            containerColor = item.type.color
+            containerColor = Utility.getCardColor(item.type)
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
             modifier = Modifier
                 .padding(16.dp)
-                .background(item.type.color),
+                .background(Utility.getCardColor(item.type)),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Row(
                 modifier = modifier
                     .fillMaxWidth()
-                    .background(item.type.color),
+                    .background(Utility.getCardColor(item.type)),
                 horizontalArrangement =  Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically,
             ) {

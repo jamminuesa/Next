@@ -15,6 +15,7 @@ import com.juegosdemesa.next.ui.home.HomeDestination
 import com.juegosdemesa.next.ui.home.HomeScreen
 import com.juegosdemesa.next.ui.home.NewGameDestination
 import com.juegosdemesa.next.ui.home.NewGameScreen
+import com.juegosdemesa.next.ui.theme.ThemeMode
 
 /**
  * Provides Navigation graph for the application.
@@ -22,6 +23,8 @@ import com.juegosdemesa.next.ui.home.NewGameScreen
 
 @Composable
 fun NextNavHost(
+    themeMode: ThemeMode,
+    onThemeChange: (ThemeMode) -> Unit,
     navController: NavHostController,
     modifier: Modifier = Modifier
 ){
@@ -33,6 +36,8 @@ fun NextNavHost(
     ){
         composable(route = HomeDestination.route){
             HomeScreen(
+                themeMode = themeMode,
+                onThemeChange = onThemeChange,
                 navigateToNewGame = {navController.navigate(NewGameDestination.route)}
             )
         }

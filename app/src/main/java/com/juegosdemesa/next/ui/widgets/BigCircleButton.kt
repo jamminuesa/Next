@@ -21,7 +21,7 @@ fun BigCircleButton(
         modifier = Modifier
             .padding(32.dp)
             .size(100.dp),
-        containerColor = MaterialTheme.colorScheme.primary,
+        containerColor = MaterialTheme.colorScheme.tertiary,
         shape = RoundedCornerShape(50.dp)
     ){
         Icon(imageVector = icon,

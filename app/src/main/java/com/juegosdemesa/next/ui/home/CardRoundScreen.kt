@@ -35,6 +35,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -78,8 +79,15 @@ import com.alexstyl.swipeablecard.ExperimentalSwipeableCardApi
 import com.alexstyl.swipeablecard.rememberSwipeableCardState
 import com.alexstyl.swipeablecard.swipableCard
 import com.juegosdemesa.next.R
+import com.juegosdemesa.next.data.model.Card
+import com.juegosdemesa.next.data.model.Round
 import com.juegosdemesa.next.data.model.RoundWithTeamAndModifier
+import com.juegosdemesa.next.data.model.Team
 import com.juegosdemesa.next.ui.navigation.NavigationDestination
+import com.juegosdemesa.next.ui.theme.LocalGameColors
+import com.juegosdemesa.next.ui.theme.NextTheme
+import com.juegosdemesa.next.ui.theme.RoundColors
+import com.juegosdemesa.next.ui.theme.ThemeMode
 import com.juegosdemesa.next.ui.theme.Typography
 import com.juegosdemesa.next.ui.widgets.BigCircleButton
 import com.juegosdemesa.next.ui.widgets.InformationDialog
@@ -92,6 +100,14 @@ object CardRoundDestination: NavigationDestination {
     override val route = "cardsDisplay"
     override val titleRes = R.string.app_name
 }
+
+object GameTheme {
+    val colors: RoundColors
+        @Composable
+        get() = LocalGameColors.current
+}
+
+
 
 @Composable
 fun CardRoundScreen(
@@ -131,10 +147,22 @@ fun CardRoundScreen(
         exit = fadeOut()
     ) {
         if (round != null){
+            val time by countDownViewModel.time.observeAsState(Utility.TIME_COUNTDOWN.formatTime())
+            val progress by countDownViewModel.progress.observeAsState(1.00F)
+            val isPlaying by countDownViewModel.isPlaying.observeAsState(false)
+            val cardUiState by cardViewModel.cardListState.collectAsState()
+
             SetTimeIsRunningScreen(
                 round!!,
-                countDownViewModel,
-                cardViewModel
+                time = time,
+                progress = progress,
+                isPlaying = isPlaying,
+                cardList = cardUiState,
+                addSeenCard = { card -> cardViewModel.addSeenCard(card) },
+                addPointsToScore = { points -> cardViewModel.addPointsToScore(points) },
+                addMissCard = { cardViewModel.addMissCard() },
+                noMoreCards = { countDownViewModel.noMoreCards() },
+                startTimer = { countDownViewModel.startTimer() },
             )
         }
 
@@ -179,17 +207,20 @@ fun CardRoundScreen(
 @OptIn(ExperimentalSwipeableCardApi::class)
 private fun SetTimeIsRunningScreen(
     round: RoundWithTeamAndModifier,
-    countDownViewModel: CountDownViewModel,
-    cardViewModel: CardViewModel
+    time: String,
+    progress: Float,
+    isPlaying: Boolean,
+    cardList: List<Card>,
+    addSeenCard: (Card) -> Unit,
+    addPointsToScore: (Int) -> Unit,
+    addMissCard: () -> Unit,
+    noMoreCards: () -> Unit,
+    startTimer: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    val time by countDownViewModel.time.observeAsState(Utility.TIME_COUNTDOWN.formatTime())
-    val progress by countDownViewModel.progress.observeAsState(1.00F)
-    val isPlaying by countDownViewModel.isPlaying.observeAsState(false)
-    val cardUiState by cardViewModel.cardListState.collectAsState()
     val openInformationDialog = remember { mutableStateOf(false)  }
 
-    val cardStates = cardUiState
+    val cardStates = cardList
         .reversed()
         .map { it to rememberSwipeableCardState() }
 
@@ -263,28 +294,28 @@ private fun SetTimeIsRunningScreen(
                             CardViewFinishSong(
                                 modifier = modifier,
                                 text = card.text,
-                                color = round.round.type.color
+                                color = Utility.getCardColor(round.round.type)
                             )
                         } else {
                             CardView(
                                 modifier = modifier,
                                 text = card.text,
-                                color = round.round.type.color
+                                color = Utility.getCardColor(round.round.type)
                             )
                         }
                 }
                 LaunchedEffect(card, state.swipedDirection) {
                     if (state.swipedDirection != null) {
-                            cardViewModel.addSeenCard(cardStates[index - 1].first) // List is reversed
+                            addSeenCard(cardStates[index - 1].first) // List is reversed
                         if (state.swipedDirection == Direction.Right) {
-                            cardViewModel.addPointsToScore(card.points)
+                            addPointsToScore(card.points)
                         } else if (state.swipedDirection == Direction.Left) {
-                            cardViewModel.addMissCard()
+                            addMissCard()
                         }
 
                         //Check if there are more cards
-                        if (cardUiState.last().id == card.id) {
-                            countDownViewModel.noMoreCards()
+                        if (cardList.last().id == card.id) {
+                            noMoreCards()
                         }
                     }
                 }
@@ -295,7 +326,7 @@ private fun SetTimeIsRunningScreen(
             progress = progress,
             time = time,
             isPlaying = isPlaying,
-            startTimer = {countDownViewModel.startTimer()},
+            startTimer = startTimer,
             swipeLeft = {
                 scope.launch {
                     val last = cardStates.reversed()
@@ -388,20 +419,6 @@ private fun ButtonsNTimer(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun ButtonSNTimerPreview(){
-    ButtonsNTimer(
-        roundModifierText = "",
-        progress = 0.5f,
-        time = "00:45",
-        isPlaying = true,
-        startTimer = {},
-        swipeRight = {},
-        swipeLeft = {}
-    )
-}
-
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
@@ -445,6 +462,47 @@ private fun SetTimeIsUpScreen(
             ) {
                 Text(text = "Turno de ${nextTeam.team.name}")
             }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun TimeRunningScreenPreviewLight(){
+    TimeRunningScreenPreview(themeMode = ThemeMode.Light)
+}
+
+@Preview
+@Composable
+private fun TimeRunningScreenPreviewDark(){
+    TimeRunningScreenPreview(themeMode = ThemeMode.Dark)
+}
+
+@Composable
+private fun TimeRunningScreenPreview(themeMode: ThemeMode){
+    NextTheme (themeMode = themeMode){
+        val cards = listOf(
+            Card(text = "Texto 1"),
+            Card(text = "Texto 2"),
+            Card(text = "Texto 3"),
+            Card(text = "Texto 4")
+        )
+        Surface {
+            SetTimeIsRunningScreen(
+                round = RoundWithTeamAndModifier(
+                    round = Round(),
+                    team = Team(name = "Equipo A")
+                ),
+                time = "00:05",
+                progress = 0.5f,
+                isPlaying = true,
+                cardList = cards,
+                addSeenCard = {},
+                addPointsToScore = {},
+                addMissCard = {},
+                noMoreCards = {},
+                startTimer = {}
+            ) 
         }
     }
 }
@@ -519,7 +577,6 @@ fun CountDownIndicator(
             Column(modifier = Modifier.align(Alignment.Center)) {
                 Text(
                     text = time,
-                    color = Color.Black,
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     fontWeight = FontWeight.Bold
                 )
@@ -564,22 +621,22 @@ private fun CardViewFinishSong(
 ){
     val annotatedString = buildAnnotatedString {
         if (text.contains(" ... ") && text.contains(" - ")){
-            withStyle(style = SpanStyle(color = Color.Black)) {
+            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onSurface)) {
                 append(text.substring(0, text.indexOf(" ... ") + 1) )
             }
-            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary, fontSize = 60.sp)) {
+            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onSurface, fontSize = 60.sp)) {
                 append(text.substring(text.indexOf(" ... ") + 1,
                     text.indexOf(" ... ") + 4 )
                 )
             }
 
-            withStyle(style = SpanStyle(color = Color.Black,
+            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onSurface,
                 textDecoration = TextDecoration.Underline)
             ) {
                 append(text.substring(text.indexOf(" ... ") + 4, text.indexOf(" - ")))
             }
 
-            withStyle(style = SpanStyle(fontSize = 20.sp)) {
+            withStyle(style = SpanStyle(fontSize = 20.sp, color = MaterialTheme.colorScheme.onSurface)) {
                 append("\n" + text.substring(text.indexOf(" - ") + 3))
             }
         } else {
@@ -593,15 +650,45 @@ private fun CardViewFinishSong(
         color = color )
 }
 
-@Preview(showBackground = true)
+@Preview
 @Composable
-private fun CardViewSongPreview(){
-    val text = "Sufre , mamón, devuélveme a mi chica ... O te retorcerás entre polvos picapica - Hombres G"
-    CardViewFinishSong(
-        modifier =  Modifier,
-        text = text,
-        Color.White
-    )
+private fun TimeRunningScreenPreviewSongLight(){
+    TimeRunningScreenPreviewCardSong(themeMode = ThemeMode.Light)
+}
+
+@Preview
+@Composable
+private fun TimeRunningScreenPreviewSongDark(){
+    TimeRunningScreenPreviewCardSong(themeMode = ThemeMode.Dark)
+}
+
+@Composable
+private fun TimeRunningScreenPreviewCardSong(themeMode: ThemeMode){
+    NextTheme (themeMode = themeMode){
+        val text = "Sufre , mamón, devuélveme a mi chica ... O te retorcerás entre polvos picapica - Hombres G"
+
+        val cards = listOf(
+            Card(text = text),
+            Card(text = text),
+        )
+        Surface {
+            SetTimeIsRunningScreen(
+                round = RoundWithTeamAndModifier(
+                    round = Round(type= Card.Category.FINISH_THE_SONG),
+                    team = Team(name = "Equipo A")
+                ),
+                time = "00:05",
+                progress = 0.5f,
+                isPlaying = true,
+                cardList = cards,
+                addSeenCard = {},
+                addPointsToScore = {},
+                addMissCard = {},
+                noMoreCards = {},
+                startTimer = {}
+            )
+        }
+    }
 }
 
 @Composable
@@ -622,6 +709,7 @@ fun CardView(
                 style = MaterialTheme.typography.bodyMedium.copy(
                     textAlign = TextAlign.Center, // Apply text alignment
                     lineHeight = 50.sp,
+                    color = MaterialTheme.colorScheme.onSurface
                 ),
                 modifier = Modifier
                     .fillMaxWidth()

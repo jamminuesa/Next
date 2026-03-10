@@ -14,10 +14,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.juegosdemesa.next.ui.navigation.NextNavHost
+import com.juegosdemesa.next.ui.theme.ThemeMode
 
 @Composable
-fun NextApp(navController: NavHostController = rememberNavController()){
-    NextNavHost(navController = navController)
+fun NextApp(
+    themeMode: ThemeMode,
+    onThemeChange: (ThemeMode) -> Unit,
+    navController: NavHostController = rememberNavController()){
+    NextNavHost(
+        themeMode = themeMode,
+        onThemeChange = onThemeChange,
+        navController = navController
+    )
 }
 
 /**
